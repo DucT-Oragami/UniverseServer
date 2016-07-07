@@ -1,7 +1,7 @@
 #include "AuthPackets.h"
 #include "serverLoop.h"
 #include "Packet.h"
-#include "md5.h"
+#include "sha512.h"
 #include "UtfConverter.h"
 
 #include "RakNet\BitStream.h"

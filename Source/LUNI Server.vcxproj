@@ -132,7 +132,7 @@
     <ClInclude Include="LootObject.h" />
     <ClInclude Include="LUZFile.h" />
     <ClInclude Include="LVLFile.h" />
-    <ClInclude Include="md5.h" />
+    <ClInclude Include="sha512.h" />
     <ClInclude Include="NPCObject.h" />
     <ClInclude Include="ObjectID.h" />
     <ClInclude Include="Packet.h" />
@@ -185,7 +185,7 @@
     <ClCompile Include="LUZFile.cpp" />
     <ClCompile Include="LVLFile.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="md5.cpp" />
+    <ClCompile Include="sha512.cpp" />
     <ClCompile Include="NPCObject.cpp" />
     <ClCompile Include="ObjectID.cpp" />
     <ClCompile Include="PlayerObject.cpp" />

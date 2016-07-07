@@ -15,7 +15,7 @@
 #include "Logger.h"
 #include "Config.h"
 #include "UtfConverter.h"
-#include "md5.h"
+#include "sha512.h"
 
 using namespace RakNet;
 

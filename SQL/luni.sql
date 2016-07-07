@@ -13,7 +13,7 @@ Also includes Jonny's SQL Code that has a table called World_Objects that holds 
 CREATE TABLE IF NOT EXISTS `accounts` (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` varchar(35) COLLATE utf8_unicode_ci NOT NULL,
-  `password` varchar(64) COLLATE utf8_unicode_ci NOT NULL,
+  `password` varchar(128) COLLATE utf8_unicode_ci NOT NULL,
   `email` varchar(30) COLLATE utf8_unicode_ci NOT NULL,
   `ip` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '127.0.0.1',
   `rank` smallint(1) NOT NULL DEFAULT '0',
@@ -142,7 +142,7 @@ CREATE TABLE IF NOT EXISTS `sessions` (
   `sessionid` int(20) NOT NULL AUTO_INCREMENT,
   `ipaddress` varchar(21) NOT NULL DEFAULT '',
   `phase` smallint(6) NOT NULL DEFAULT '1' COMMENT '1 = CONNECTED, 2 = AUTHENTIFIED, 3 = PLAYING, 4 = INWORLD',
-  `sessionkey` varchar(33) NOT NULL DEFAULT '',
+  `sessionkey` varchar(32) NOT NULL DEFAULT '',
   `instanceid` int(11) DEFAULT NULL,
   `accountid` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `login_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,

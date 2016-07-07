@@ -54,3 +54,6 @@ Auth/
 config.ini
 *.lnk
 *.log
+*.opensdf
+*.suo
+*.sdf

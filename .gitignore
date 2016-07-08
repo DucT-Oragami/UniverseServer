@@ -18,6 +18,11 @@ $RECYCLE.BIN/
 *.lnk
 
 **/*.obj
+**/*.exe
+**/*.ilk
+**/*.pdb
+**/*.sdf
+**/*.suo
 
 # =========================
 # Operating System Files
@@ -55,5 +60,3 @@ config.ini
 *.lnk
 *.log
 *.opensdf
-*.suo
-*.sdf

@@ -172,7 +172,7 @@ void HandleUserLogin(RakPeerInterface* rakServer, Packet* packet) {
 		time_t t = time(NULL);
 		unsigned int addr = packet->systemAddress.binaryAddress;
 		long long a = (long long)t * (long long)addr;
-		std::string keyhash = md5(std::to_string(a));
+		std::string keyhash = sha512(std::to_string(a));
 		std::wstring key = StringToWString(keyhash, 33);
 
 		// Get the user key

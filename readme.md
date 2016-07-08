@@ -3,9 +3,9 @@
 
 1) Server Issues
   
-  - The server runs on CuzitsJonny's source code. We give him full credit as we did not make this code. Its not a full version of LEGO Universe which mean it can be unstable
+  - The server runs on CuzitsJonny's source code. I give him full credit as I did not make this code. Its not a full version of LEGO Universe which means it can be unstable
   
-  - The message "Server Is Under Maintence" means the world server crashed. Give it a few miniutes to restart
+  - The message "Server Is Under Maintence" means the world server crashed. Give it a few minutes to restart
   
   - The message "Server Is loading resources" is self explanitory, give it a few seconds. If you spam the Enter button you will promted with a message saying to update your client. If you do, just close the client and re-open it.
 

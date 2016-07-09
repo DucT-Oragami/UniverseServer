@@ -228,6 +228,9 @@
     <ClInclude Include="sha512.h">
       <Filter>Header Files\Common\Utility</Filter>
     </ClInclude>
+    <ClInclude Include="tracer.h">
+      <Filter>Header Files\Common\Utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">

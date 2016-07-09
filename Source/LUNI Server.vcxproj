@@ -155,6 +155,7 @@
     <ClInclude Include="SQLite\sqlite3.h" />
     <ClInclude Include="SQLite\sqlite3ext.h" />
     <ClInclude Include="TimeUtil.h" />
+    <ClInclude Include="tracer.h" />
     <ClInclude Include="UtfConverter.h" />
     <ClInclude Include="World.h" />
     <ClInclude Include="WorldConnection.h" />

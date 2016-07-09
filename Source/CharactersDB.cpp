@@ -65,9 +65,14 @@ std::vector<long long> CharactersTable::getCharacters(unsigned int accountid){
 ListCharacterInfo CharactersTable::getCharacterInfo(long long objid){
 	std::stringstream qrs;
 	qrs << "SELECT ";
+	// 0 - 6 ~ Info
 	qrs << "`accountID`, `objectID`, `name`, `unapprovedName`, `nameRejected`, `freeToPlay`, `gmlevel`, ";
+	// 7 - 16 ~ Style
 	qrs << "`shirtColor`, `shirtStyle`, `pantsColor`, `hairStyle`, `hairColor`, `lh`, `rh`, `eyebrows`, `eyes`, `mouth`, ";
-	qrs << "`lastZoneId`, `mapInstance`, `mapClone`, `x`, `y`, `z` ";
+	// 17 - 22 ~ Place
+	qrs << "`lastZoneId`, `mapInstance`, `mapClone`, `x`, `y`, `z`, ";
+	// 23 ~ Attributes
+	qrs << "`level` ";
 	qrs << "FROM `characters` WHERE `objectID` = '" << std::to_string(objid) << "';";
 	std::string qrss = qrs.str();
 	auto qr = Database::Query(qrss);
@@ -81,9 +86,14 @@ ListCharacterInfo CharactersTable::getCharacterInfo(long long objid){
 ListCharacterInfo CharactersTable::getCharacterInfo(std::string name){
 	std::stringstream qrs;
 	qrs << "SELECT ";
+	// 0 - 6 ~ Info
 	qrs << "`accountID`, `objectID`, `name`, `unapprovedName`, `nameRejected`, `freeToPlay`, `gmlevel`, ";
+	// 7 - 16 ~ Style
 	qrs << "`shirtColor`, `shirtStyle`, `pantsColor`, `hairStyle`, `hairColor`, `lh`, `rh`, `eyebrows`, `eyes`, `mouth`, ";
-	qrs << "`lastZoneId`, `mapInstance`, `mapClone`, `x`, `y`, `z` ";
+	// 17 - 22 ~ Place
+	qrs << "`lastZoneId`, `mapInstance`, `mapClone`, `x`, `y`, `z`, ";
+	// 23 ~ Attributes
+	qrs << "`level` ";
 	qrs << "FROM `characters` WHERE `name` = '" << name << "';";
 	std::string qrss = qrs.str();
 	auto qr = Database::Query(qrss);
@@ -124,6 +134,8 @@ ListCharacterInfo CharactersTable::getCharacterInfo(MYSQL_RES *res){
 		i.lastPlace.x = std::stof(r[20]);
 		i.lastPlace.y = std::stof(r[21]);
 		i.lastPlace.z = std::stof(r[22]);
+		//Attributes
+		i.attribute.level = std::stoul(r[23]);
 	}
 	return i;
 }
@@ -240,6 +252,34 @@ void CharactersTable::resurrectCharacter(long long objid, bool bRezImmediately){
 	std::stringstream eqqr;
 	eqqr << "UPDATE `characters` SET `isAlive`='1' WHERE `objectID` = '" << objid << "';";
 	Database::Query(eqqr.str());
+}
+
+void CharactersTable::levelCharacter(long long objid){
+	auto qr1 = Database::Query("SELECT `level` FROM `characters` WHERE `objid` = '" + std::to_string(objid) + "';");
+	if (mysql_num_rows(qr1) > 0){
+		auto r = mysql_fetch_row(qr1);
+		auto level = std::stoi(r[0]) + 1;
+		Database::Query("UPDATE `characters` SET `level` = '" + std::to_string(level) + "' WHERE `objid` = '" + std::to_string(objid));
+	}
+	else{
+		Logger::log("CHDB", "levelCharacter", "mysql_num_rows: " + mysql_num_rows(qr1), LOG_ERROR);
+	}
+};
+
+unsigned long CharactersTable::getCharacterLevel(long long objid){
+	std::stringstream qrs;
+	qrs << "SELECT `level` FROM `characters` WHERE `objectID` = '" << std::to_string(objid) << "';";
+	std::string qrss = qrs.str();
+	auto qr = Database::Query(qrss);
+
+	if (mysql_num_rows(qr) == 0) {
+		return 0;
+	}
+	else {
+		auto r = mysql_fetch_row(qr);
+		return std::stol(r[0]);
+	}
+
 }
 
 void CharactersTable::setCharacterMoney(long long objid, long long currency) {

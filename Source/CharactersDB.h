@@ -42,10 +42,15 @@ struct CharacterInfo{
 	bool isFreeToPlay = false;
 };
 
+struct CharacterAttributes{
+	unsigned long level = 1;
+};
+
 struct ListCharacterInfo{
 	WorldPlace lastPlace;
 	CharacterStyle style;
 	CharacterInfo info;
+	CharacterAttributes attribute;
 };
 
 class CharactersTable {
@@ -67,6 +72,8 @@ public:
 	static bool isCharacterAlive(long long objid);
 	static void killCharacter(long long objid);
 	static void resurrectCharacter(long long objid, bool bRezImmediately = false);
+	static void levelCharacter(long long objid);
+	static unsigned long getCharacterLevel(long long objid);
 	static void setCharacterMoney(long long objid, long long currency);
 	static long long getCharacterCurrency(long long objid);
 	static void CharactersTable::setCharacterName(long long objid, std::string newName);

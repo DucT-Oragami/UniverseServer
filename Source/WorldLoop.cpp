@@ -1286,6 +1286,7 @@ void parsePacket(RakPeerInterface* rakServer, SystemAddress &systemAddress, RakN
 			case 1734:
 				//Level UP
 
+				CharactersTable::levelCharacter(objid);
 				break;
 			default:
 				Logger::log("WRLD", "GAMEMESSAGE", "Unknown Game Message: " + std::to_string(msgid));
@@ -1364,7 +1365,7 @@ void parsePacket(RakPeerInterface* rakServer, SystemAddress &systemAddress, RakN
 				c1->setPosition(pos);
 
 				CharacterComponent *c4 = player->getComponent4();
-				c4->setLevel(69);
+				c4->setLevel(cinfo.attribute.level);
 				PLAYER_INFO pi;
 				pi.accountID = s.accountid;
 				pi.isFreeToPlay = cinfo.info.isFreeToPlay;

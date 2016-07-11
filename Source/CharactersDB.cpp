@@ -3,6 +3,8 @@
 #include "Database.h"
 #include "Logger.h"
 #include "GameMessages.h"
+//#include "PlayerObject.h"
+//#include "Worlds.h"
 
 #include <sstream>
 #include <iostream>
@@ -71,8 +73,8 @@ ListCharacterInfo CharactersTable::getCharacterInfo(long long objid){
 	qrs << "`shirtColor`, `shirtStyle`, `pantsColor`, `hairStyle`, `hairColor`, `lh`, `rh`, `eyebrows`, `eyes`, `mouth`, ";
 	// 17 - 22 ~ Place
 	qrs << "`lastZoneId`, `mapInstance`, `mapClone`, `x`, `y`, `z`, ";
-	// 23 ~ Attributes
-	qrs << "`level` ";
+	// 23 - 26 ~ Attributes
+	qrs << "`level`, `uScore`, `health`, `maxHealth` ";
 	qrs << "FROM `characters` WHERE `objectID` = '" << std::to_string(objid) << "';";
 	std::string qrss = qrs.str();
 	auto qr = Database::Query(qrss);
@@ -92,8 +94,8 @@ ListCharacterInfo CharactersTable::getCharacterInfo(std::string name){
 	qrs << "`shirtColor`, `shirtStyle`, `pantsColor`, `hairStyle`, `hairColor`, `lh`, `rh`, `eyebrows`, `eyes`, `mouth`, ";
 	// 17 - 22 ~ Place
 	qrs << "`lastZoneId`, `mapInstance`, `mapClone`, `x`, `y`, `z`, ";
-	// 23 ~ Attributes
-	qrs << "`level` ";
+	// 23 - 26 ~ Attributes
+	qrs << "`level`, `uScore`, `health`, `maxHealth` ";
 	qrs << "FROM `characters` WHERE `name` = '" << name << "';";
 	std::string qrss = qrs.str();
 	auto qr = Database::Query(qrss);
@@ -136,6 +138,9 @@ ListCharacterInfo CharactersTable::getCharacterInfo(MYSQL_RES *res){
 		i.lastPlace.z = std::stof(r[22]);
 		//Attributes
 		i.attribute.level = std::stoul(r[23]);
+		i.attribute.uScore = std::stoll(r[24]);
+		i.attribute.health = std::stoul(r[25]);
+		i.attribute.maxHealth = std::stof(r[26]);
 	}
 	return i;
 }
@@ -254,12 +259,23 @@ void CharactersTable::resurrectCharacter(long long objid, bool bRezImmediately){
 	Database::Query(eqqr.str());
 }
 
+// To do:
+// Check if player is valid for level up,
+// Reset player uScore (Or take the current value minus the required value) upon level up
+
+// Note:
+// When a player recieves uScore, and they reach the threshold for the next level,
+// the client will send a "levelup request" packet to the server
+// (See case 1734 in WorldLoop)
 void CharactersTable::levelCharacter(long long objid){
-	auto qr1 = Database::Query("SELECT `level` FROM `characters` WHERE `objid` = '" + std::to_string(objid) + "';");
+	auto qr1 = Database::Query("SELECT `level` FROM `characters` WHERE `objectID` = '" + std::to_string(objid) + "';");
 	if (mysql_num_rows(qr1) > 0){
 		auto r = mysql_fetch_row(qr1);
-		auto level = std::stoi(r[0]) + 1;
-		Database::Query("UPDATE `characters` SET `level` = '" + std::to_string(level) + "' WHERE `objid` = '" + std::to_string(objid));
+		unsigned long level = std::stol(r[0]) + 1;
+
+		std::stringstream eqqr;
+		eqqr << "UPDATE `characters` SET `level`='" + std::to_string(level) + "' WHERE `objectID` = '" << objid << "';";
+	    Database::Query(eqqr.str());
 	}
 	else{
 		Logger::log("CHDB", "levelCharacter", "mysql_num_rows: " + mysql_num_rows(qr1), LOG_ERROR);
@@ -280,6 +296,71 @@ unsigned long CharactersTable::getCharacterLevel(long long objid){
 		return std::stol(r[0]);
 	}
 
+}
+
+// To do:
+// Update uScore in real time,
+// And fix wrong uScore amount in player satistics menu
+// Get rid of all these lame 'To do' comments when you're done with them
+void CharactersTable::addCharacterUScore(long long objid, long long score){
+	auto qr1 = Database::Query("SELECT `uScore` from `characters` WHERE `objectID` = '" + std::to_string(objid) + "';");
+	if (mysql_num_rows(qr1) > 0){
+
+		// Perform Calculations
+		auto r = mysql_fetch_row(qr1);
+		long long finalScore = std::stoll(r[0]) + score;
+
+		SessionInfo s = SessionsTable::getClientSession(SessionsTable::findCharacter(objid));
+		// Attempt to update the players uScore in real time, but I can't, for the life of me, figure out how. .
+		/*
+		ListCharacterInfo cinfo = CharactersTable::getCharacterInfo(objid);
+		PlayerObject *player = (PlayerObject *)ObjectsManager::getObjectByID(s.activeCharId);
+		CharacterComponent *c4 = player->getComponent4();
+		PLAYER_INFO pi;
+		pi.accountID = s.accountid;
+		pi.isFreeToPlay = cinfo.info.isFreeToPlay;
+		pi.legoScore = finalScore;
+		c4->setInfo(pi);
+
+		ObjectsManager::serialize(player);
+		*/
+
+		// Construct Packet
+	    RakNet::BitStream *bs = WorldServer::initPacket(RemoteConnection::CLIENT, ClientPacketID::SERVER_GAME_MSG);
+	    bs->Write(objid);
+	    bs->Write((unsigned short)1459);
+		bs->Write((long long)finalScore);
+
+		// Send Packet
+		std::vector<SessionInfo> sessionsz = SessionsTable::getClientsInWorld(s.zone);
+	    for (unsigned int k = 0; k < sessionsz.size(); k++){
+	    	WorldServer::sendPacket(bs, sessionsz.at(k).addr);
+	    }
+
+		// Update Database
+		std::stringstream eqqr;
+	    eqqr << "UPDATE `characters` SET `uScore`='" + std::to_string(finalScore) + "' WHERE `objectID` = '" << objid << "';";
+	    Database::Query(eqqr.str());
+	}
+	else{
+	    Logger::log("CHDB", "addCharacterUScore", "mysql_num_rows: " + mysql_num_rows(qr1), LOG_ERROR);
+	}
+}
+
+long long CharactersTable::getCharacterUScore(long long objid){
+	std::stringstream qrs;
+	qrs << "SELECT `uScore` FROM `characters` WHERE `objectID` = '" << std::to_string(objid) << "`;";
+	std::string qrss = qrs.str();
+	auto qr = Database::Query(qrss);
+	
+	if  (mysql_num_rows(qr) == 0){
+		return 0;
+	}
+
+	else{
+		auto r = mysql_fetch_row(qr);
+		return std::stoll(r[0]);
+	}
 }
 
 void CharactersTable::setCharacterMoney(long long objid, long long currency) {

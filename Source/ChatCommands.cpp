@@ -953,6 +953,73 @@ std::wstring DebugCommandHandler::getSyntax(){
 	return L"";
 }
 
+void LevelUpCommandHandler::handleCommand(SessionInfo *s, std::vector<std::wstring> * params){
+	if (AccountsTable::getRank(s->accountid) > 0){
+		long long objid = s->activeCharId;
+	    CharactersTable::levelCharacter(objid);
+		Chat::sendChatMessage(s->addr, L"Level Up!");
+	}
+	else{
+		Chat::sendChatMessage(s->addr, L"You don't have permission to use this command!");
+	}
+}
+
+std::vector<std::wstring> LevelUpCommandHandler::getCommandNames(){
+	return{ L"levelup" };
+}
+
+std::wstring LevelUpCommandHandler::getDescription(){
+	return L"Levels up your character";
+}
+
+std::wstring LevelUpCommandHandler::getShortDescription(){
+	return L"Level Up";
+}
+
+std::wstring LevelUpCommandHandler::getSyntax(){
+	return L"";
+}
+
+void AddUScoreCommandHandler::handleCommand(SessionInfo *s, std::vector<std::wstring> * params){
+	if (AccountsTable::getRank(s->accountid) > 0){
+		if (params->size() == 1){
+			std::string check = UtfConverter::ToUtf8(params->at(0));
+			bool flag = isNumber(check);
+			if (flag){
+				long long uScore = std::stoll(params->at(0));
+				long long objid = s->activeCharId;
+	            CharactersTable::addCharacterUScore(objid, uScore);
+		        Chat::sendChatMessage(s->addr, L"Increased!");
+			}
+			else{
+				Chat::sendChatMessage(s->addr, L"Syntax: /" + this->getCommandNames().at(0) + L" " + this->getSyntax());
+			}
+		}
+		else{
+			Chat::sendChatMessage(s->addr, L"Syntax: /" + this->getCommandNames().at(0) + L" " + this->getSyntax());
+		}
+	}
+	else{
+		Chat::sendChatMessage(s->addr, L"You don't have permission to use this command!");
+	}
+}
+
+std::vector<std::wstring> AddUScoreCommandHandler::getCommandNames(){
+	return{ L"adduscore" };
+}
+
+std::wstring AddUScoreCommandHandler::getDescription(){
+	return L"Adds uScore to yoru Characters";
+}
+
+std::wstring AddUScoreCommandHandler::getShortDescription(){
+	return L"Add uScore";
+}
+
+std::wstring AddUScoreCommandHandler::getSyntax(){
+	return L"<amount>";
+}
+
 void SetMoneyCommandHandler::handleCommand(SessionInfo *s, std::vector<std::wstring> * params){
 	if (AccountsTable::getRank(s->accountid) > 0){
 		if (params->size() > 0 && params->size() < 3){

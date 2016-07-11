@@ -150,6 +150,22 @@ class DebugCommandHandler : public ChatCommandHandler{
 	std::wstring getSyntax();
 };
 
+class LevelUpCommandHandler : public ChatCommandHandler{
+	void handleCommand(SessionInfo *s, std::vector<std::wstring> * params);
+	std::vector<std::wstring> getCommandNames();
+	std::wstring getDescription();
+	std::wstring getShortDescription();
+	std::wstring getSyntax();
+};
+
+class AddUScoreCommandHandler : public ChatCommandHandler{
+	void handleCommand(SessionInfo *s, std::vector<std::wstring> * params);
+	std::vector<std::wstring> getCommandNames();
+	std::wstring getDescription();
+	std::wstring getShortDescription();
+	std::wstring getSyntax();
+};
+
 class SetMoneyCommandHandler : public ChatCommandHandler{
 	void handleCommand(SessionInfo *s, std::vector<std::wstring> * params);
 	std::vector<std::wstring> getCommandNames();

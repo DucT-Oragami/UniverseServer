@@ -66,7 +66,9 @@ CREATE TABLE IF NOT EXISTS `characters` (
   `friends` varchar(100) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   `bestFriends` varchar(50) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   `level` int(3) NOT NULL DEFAULT '1',
-  `uScore` int(32) NOT NULL DEFAULT '0',
+  `uScore` bigint(32) NOT NULL DEFAULT '0',
+  `health` int(11) NOT NULL DEFAULT '4',
+  `maxHealth` float NOT NULL DEFAULT '4',
   `currency` bigint(20) NOT NULL DEFAULT '0',
   `isAlive` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`objectID`)

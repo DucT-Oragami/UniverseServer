@@ -159,11 +159,9 @@ void WorldServerPackets::CreateCharacter(SystemAddress address, long long charob
 	writeRaw(xml, "<char cc=\"");
 	writeRaw(xml, std::to_string(CharactersTable::getCharacterCurrency(charobjid)).c_str());
 	writeRaw(xml, "\"></char>");
-	std::stringstream adddata;
-	adddata << "<lvl";
-	adddata << " l=\"" << std::to_string(CharactersTable::getCharacterLevel(charobjid)).c_str() << "\"";
-	adddata << "/>";
-	writeRaw(xml, adddata.str());
+	writeRaw(xml, "<lvl l=\"");
+	writeRaw(xml, std::to_string(CharactersTable::getCharacterLevel(charobjid)).c_str());
+	writeRaw(xml, "\"></lvl>");
 	writeRaw(xml, "<flag/>");
 	writeRaw(xml, "<pet/>");
 

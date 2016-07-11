@@ -131,7 +131,7 @@ void WorldLoop() {
 	ChatCommandManager::registerCommands(new AddItemCommandHandler());
 	ChatCommandManager::registerCommands(new PositionCommandHandler());
 	ChatCommandManager::registerCommands(new ClientCommandHandler());
-	//ChatCommandManager::registerCommands(new AttributeCommandHandler());
+	ChatCommandManager::registerCommands(new AttributeCommandHandler());
 	ChatCommandManager::registerCommands(new PacketCommandHandler());
 	ChatCommandManager::registerCommands(new AnnouncementCommandHandler());
 	ChatCommandManager::registerCommands(new AdminCommandHandler());
@@ -139,6 +139,8 @@ void WorldLoop() {
 	ChatCommandManager::registerCommands(new DeleteObjectCommandHandler());
 	ChatCommandManager::registerCommands(new NearMeCommandHandler());
 	//ChatCommandManager::registerCommands(new DebugCommandHandler());
+	ChatCommandManager::registerCommands(new LevelUpCommandHandler());
+	ChatCommandManager::registerCommands(new AddUScoreCommandHandler());
 	ChatCommandManager::registerCommands(new SetMoneyCommandHandler());
 	ChatCommandManager::registerCommands(new DanceCommandHandler());
 	ChatCommandManager::registerCommands(new SetNameCommandHandler());
@@ -1284,10 +1286,12 @@ void parsePacket(RakPeerInterface* rakServer, SystemAddress &systemAddress, RakN
 				break;
 			}
 			case 1734:
+			{
 				//Level UP
 
 				CharactersTable::levelCharacter(objid);
 				break;
+			}
 			default:
 				Logger::log("WRLD", "GAMEMESSAGE", "Unknown Game Message: " + std::to_string(msgid));
 				break;
@@ -1369,7 +1373,7 @@ void parsePacket(RakPeerInterface* rakServer, SystemAddress &systemAddress, RakN
 				PLAYER_INFO pi;
 				pi.accountID = s.accountid;
 				pi.isFreeToPlay = cinfo.info.isFreeToPlay;
-				pi.legoScore = 0;
+				pi.legoScore = cinfo.attribute.uScore;
 				c4->setInfo(pi);
 				PLAYER_STYLE ps;
 				ps.eyebrowsStyle = cinfo.style.eyebrows;
@@ -1383,9 +1387,9 @@ void parsePacket(RakPeerInterface* rakServer, SystemAddress &systemAddress, RakN
 
 				DestructibleComponent *c7 = player->getComponent7();
 				COMPONENT7_DATA4 d4 = c7->getData4();
-				d4.health = 4;
-				d4.maxHealthN = 4.0F;
-				d4.maxHealth = 4.0F;
+				d4.health = cinfo.attribute.health;
+				d4.maxHealthN = cinfo.attribute.maxHealth;
+				d4.maxHealth = cinfo.attribute.maxHealth;
 				d4.imagination = 20;
 				d4.maxImagination = 20.0F;
 				d4.maxImaginationN = 20.0F;

@@ -331,6 +331,9 @@ void SwitchCommandHandler::handleCommand(SessionInfo *s, std::vector<std::wstrin
 		else
 			Chat::sendChatMessage(s->addr, L"Syntax: /" + this->getCommandNames().at(0) + L" " + this->getSyntax());
 	}
+	else{
+		commandAccessDenied();
+	}
 }
 
 std::vector<std::wstring> SwitchCommandHandler::getCommandNames(){
@@ -476,35 +479,44 @@ std::wstring ClientCommandHandler::getSyntax(){
 	return L"";
 }
 
+
 void AttributeCommandHandler::handleCommand(SessionInfo *s, std::vector<std::wstring> * params){
-	if (params->size() > 1){
-		std::wstring attr = params->at(0);
-		unsigned long value = std::stoul(params->at(1));
-		bool max = false;
-		float maxV = 0;
-		if (params->size() > 2){
-			max = true;
-			maxV = std::stof(params->at(2));
+	if (AccountsTable::getRank(s->accountid) > 0){
+		if (params->size() > 1){
+			std::wstring attr = params->at(0);
+			unsigned long value = std::stoul(params->at(1));
+			bool max = false;
+			float maxV = 0;
+			if (params->size() > 2){
+				max = true;
+				maxV = std::stof(params->at(2));
+			}
+			PlayerObject *player = (PlayerObject *)ObjectsManager::getObjectByID(s->activeCharId);
+			if (player != NULL){
+				long long objid = s->activeCharId;
+				if (attr == L"health"){
+					if (max) CharactersTable::setCharacterMaxHealth(objid, maxV);
+					CharactersTable::setCharacterHealth(objid, value);
+				}
+				else if (attr == L"armor"){
+					if (max) CharactersTable::setCharacterMaxArmor(objid, maxV);
+					CharactersTable::setCharacterArmor(objid, value);
+				}
+				else if (attr == L"imagi"){
+					if (max) CharactersTable::setCharacterMaxImagination(objid, maxV);
+					CharactersTable::setCharacterImagination(objid, value);
+				}
+				else{
+					Chat::sendChatMessage(s->addr, L"Syntax: /" + this->getCommandNames().at(0) + L" " + this->getSyntax());
+				}
+			}
 		}
-		PlayerObject *player = (PlayerObject *)ObjectsManager::getObjectByID(s->activeCharId);
-		if (player != NULL){
-			DestructibleComponent *c7 = player->getComponent7();
-			COMPONENT7_DATA4 d4 = c7->getData4();
-			if (attr == L"health"){
-				d4.health = value;
-				if (max) d4.maxHealth = maxV;
-			}
-			else if (attr == L"armor"){
-				d4.armor = value;
-				if (max) d4.maxArmor = maxV;
-			}
-			else if (attr == L"imagi"){
-				d4.imagination = value;
-				if (max) d4.maxImagination = maxV;
-			}
-			c7->setData4(d4);
-			ObjectsManager::serialize(player);
+		else{
+			Chat::sendChatMessage(s->addr, L"Syntax: /" + this->getCommandNames().at(0) + L" " + this->getSyntax());
 		}
+	}
+	else{
+		commandAccessDenied();
 	}
 }
 
@@ -539,8 +551,9 @@ void PacketCommandHandler::handleCommand(SessionInfo *s, std::vector<std::wstrin
 		}
 		Chat::sendChatMessage(s->addr, msg, L"System");
 	}
-	else
-		Chat::sendChatMessage(s->addr, L"You don't have permission to use this command!");
+	else{
+		commandAccessDenied();
+	}
 }
 
 std::vector<std::wstring> PacketCommandHandler::getCommandNames(){
@@ -605,7 +618,7 @@ void AnnouncementCommandHandler::handleCommand(SessionInfo *s, std::vector<std::
 		}
 	}
 	else{
-		Chat::sendChatMessage(s->addr, L"You don't have permission to use this command!");
+		commandAccessDenied();
 	}
 }
 
@@ -761,8 +774,9 @@ void SpawnObjectCommandHandler::handleCommand(SessionInfo *s, std::vector<std::w
 		else
 			Chat::sendChatMessage(s->addr, L"Syntax: /" + this->getCommandNames().at(0) + L" " + this->getSyntax());
 	}
-	else
-		Chat::sendChatMessage(s->addr, L"You don't have permission to use this command!");
+	else{
+		commandAccessDenied();
+	}
 }
 
 std::vector<std::wstring> SpawnObjectCommandHandler::getCommandNames() {
@@ -819,8 +833,8 @@ void DeleteObjectCommandHandler::handleCommand(SessionInfo *s, std::vector<std::
 			Chat::sendChatMessage(s->addr, L"Syntax: /" + this->getCommandNames().at(0) + L" " + this->getSyntax());
 		}
 	}
-	else {
-		Chat::sendChatMessage(s->addr, L"You don't have permission to use this command!");
+	else{
+		commandAccessDenied();
 	}
 }
 
@@ -911,8 +925,9 @@ void NearMeCommandHandler::handleCommand(SessionInfo *s, std::vector<std::wstrin
 		else
 			Chat::sendChatMessage(s->addr, L"Syntax: /" + this->getCommandNames().at(0) + L" " + this->getSyntax());
 	}
-	else
-		Chat::sendChatMessage(s->addr, L"You don't have permission to use this command!");
+	else{
+		commandAccessDenied();
+	}
 }
 
 std::vector<std::wstring> NearMeCommandHandler::getCommandNames() {
@@ -960,7 +975,7 @@ void LevelUpCommandHandler::handleCommand(SessionInfo *s, std::vector<std::wstri
 		Chat::sendChatMessage(s->addr, L"Level Up!");
 	}
 	else{
-		Chat::sendChatMessage(s->addr, L"You don't have permission to use this command!");
+		commandAccessDenied();
 	}
 }
 
@@ -1000,7 +1015,7 @@ void AddUScoreCommandHandler::handleCommand(SessionInfo *s, std::vector<std::wst
 		}
 	}
 	else{
-		Chat::sendChatMessage(s->addr, L"You don't have permission to use this command!");
+		commandAccessDenied();
 	}
 }
 
@@ -1067,7 +1082,7 @@ void SetMoneyCommandHandler::handleCommand(SessionInfo *s, std::vector<std::wstr
 		}
 	}
 	else {
-		Chat::sendChatMessage(s->addr, L"You don't have permission to use this command!");
+		commandAccessDenied();
 	}
 }
 
@@ -1138,8 +1153,9 @@ void SetNameCommandHandler::handleCommand(SessionInfo *s, std::vector<std::wstri
 		else
 			Chat::sendChatMessage(s->addr, L"Syntax: /" + this->getCommandNames().at(0) + L" " + this->getSyntax());
 	}
-	else
-		Chat::sendChatMessage(s->addr, L"You don't have permission to use this command!");
+	else{
+		commandAccessDenied();
+	}
 }
 
 std::vector<std::wstring> SetNameCommandHandler::getCommandNames(){
@@ -1243,8 +1259,9 @@ void EquipOfCommandHandler::handleCommand(SessionInfo *s, std::vector<std::wstri
 		else
 			Chat::sendChatMessage(s->addr, L"Syntax: /" + this->getCommandNames().at(0) + L" " + this->getSyntax());
 	}
-	else
-		Chat::sendChatMessage(s->addr, L"You don't have permission to use this command!");
+	else{
+		commandAccessDenied();
+	}
 }
 
 std::vector<std::wstring> EquipOfCommandHandler::getCommandNames(){
@@ -1291,8 +1308,9 @@ void TestSmashCommandHandler::handleCommand(SessionInfo *s, std::vector<std::wst
 		else
 			Chat::sendChatMessage(s->addr, L"Syntax: /" + this->getCommandNames().at(0) + L" " + this->getSyntax());
 	}
-	else
-		Chat::sendChatMessage(s->addr, L"You don't have permission to use this command!");
+	else{
+		commandAccessDenied();
+	}
 }
 
 std::vector<std::wstring> TestSmashCommandHandler::getCommandNames() {

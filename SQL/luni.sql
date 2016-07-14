@@ -69,6 +69,10 @@ CREATE TABLE IF NOT EXISTS `characters` (
   `uScore` bigint(32) NOT NULL DEFAULT '0',
   `health` int(11) NOT NULL DEFAULT '4',
   `maxHealth` float NOT NULL DEFAULT '4',
+  `imagination` int(11) NOT NULL DEFAULT '0',
+  `maxImagination` float NOT NULL DEFAULT '0',
+  `armor` int(11) NOT NULL DEFAULT '0',
+  `maxArmor` float NOT NULL DEFAULT '0',
   `currency` bigint(20) NOT NULL DEFAULT '0',
   `isAlive` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`objectID`)

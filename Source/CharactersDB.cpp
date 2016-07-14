@@ -3,8 +3,8 @@
 #include "Database.h"
 #include "Logger.h"
 #include "GameMessages.h"
-//#include "PlayerObject.h"
-//#include "Worlds.h"
+#include "PlayerObject.h"
+#include "Worlds.h"
 
 #include <sstream>
 #include <iostream>
@@ -73,8 +73,8 @@ ListCharacterInfo CharactersTable::getCharacterInfo(long long objid){
 	qrs << "`shirtColor`, `shirtStyle`, `pantsColor`, `hairStyle`, `hairColor`, `lh`, `rh`, `eyebrows`, `eyes`, `mouth`, ";
 	// 17 - 22 ~ Place
 	qrs << "`lastZoneId`, `mapInstance`, `mapClone`, `x`, `y`, `z`, ";
-	// 23 - 26 ~ Attributes
-	qrs << "`level`, `uScore`, `health`, `maxHealth` ";
+	// 23 - 30 ~ Attributes
+	qrs << "`level`, `uScore`, `health`, `maxHealth`, `imagination`, `maxImagination`, `armor`, `maxArmor` ";
 	qrs << "FROM `characters` WHERE `objectID` = '" << std::to_string(objid) << "';";
 	std::string qrss = qrs.str();
 	auto qr = Database::Query(qrss);
@@ -94,8 +94,8 @@ ListCharacterInfo CharactersTable::getCharacterInfo(std::string name){
 	qrs << "`shirtColor`, `shirtStyle`, `pantsColor`, `hairStyle`, `hairColor`, `lh`, `rh`, `eyebrows`, `eyes`, `mouth`, ";
 	// 17 - 22 ~ Place
 	qrs << "`lastZoneId`, `mapInstance`, `mapClone`, `x`, `y`, `z`, ";
-	// 23 - 26 ~ Attributes
-	qrs << "`level`, `uScore`, `health`, `maxHealth` ";
+	// 23 - 30 ~ Attributes
+	qrs << "`level`, `uScore`, `health`, `maxHealth`, `imagination`, `maxImagination`, `armor`, `maxArmor` ";
 	qrs << "FROM `characters` WHERE `name` = '" << name << "';";
 	std::string qrss = qrs.str();
 	auto qr = Database::Query(qrss);
@@ -141,6 +141,10 @@ ListCharacterInfo CharactersTable::getCharacterInfo(MYSQL_RES *res){
 		i.attribute.uScore = std::stoll(r[24]);
 		i.attribute.health = std::stoul(r[25]);
 		i.attribute.maxHealth = std::stof(r[26]);
+		i.attribute.imagination = std::stoul(r[27]);
+		i.attribute.maxImagination = std::stof(r[28]);
+		i.attribute.armor = std::stoul(r[29]);
+		i.attribute.maxArmor = std::stof(r[30]);
 	}
 	return i;
 }
@@ -259,6 +263,203 @@ void CharactersTable::resurrectCharacter(long long objid, bool bRezImmediately){
 	Database::Query(eqqr.str());
 }
 
+// Character Health
+void CharactersTable::setCharacterHealth(long long objid, unsigned long health){
+    PlayerObject *player = (PlayerObject *)ObjectsManager::getObjectByID(objid);
+    DestructibleComponent *c7 = player->getComponent7();
+    COMPONENT7_DATA4 d4 = c7->getData4();
+
+	float maxHealth = CharactersTable::getCharacterMaxHealth(objid);
+	if (health > maxHealth){
+		health = maxHealth;
+	}
+    
+    d4.health = health;
+    c7->setData4(d4);
+    ObjectsManager::serialize(player);
+
+	std::stringstream eqqr;
+	eqqr << "UPDATE `characters` SET `health`='" + std::to_string(health) + "' WHERE `objectID` = '" << objid << "';";
+	Database::Query(eqqr.str());
+}
+
+unsigned long CharactersTable::getCharacterHealth(long long objid){
+    std::stringstream qrs;
+    qrs << "SELECT `health` FROM `characters` WHERE `objectID` = '" << std::to_string(objid) << "';";
+    std::string qrss = qrs.str();
+    auto qr = Database::Query(qrss);
+    
+    if (mysql_num_rows(qr) == 0 ){
+        return 0;   
+    }
+    else{
+        auto r = mysql_fetch_row(qr);
+        return std::stol(r[0]);        
+    }
+}
+
+void CharactersTable::setCharacterMaxHealth(long long objid, float maxHealth){
+    PlayerObject *player = (PlayerObject *)ObjectsManager::getObjectByID(objid);
+    DestructibleComponent *c7 = player->getComponent7();
+    COMPONENT7_DATA4 d4 = c7->getData4();
+    
+    d4.maxHealth = maxHealth;
+	d4.maxHealthN = maxHealth;
+    c7->setData4(d4);
+    ObjectsManager::serialize(player);
+    
+    std::stringstream eqqr;
+    eqqr << "UPDATE `characters` SET `maxHealth`='" + std::to_string(maxHealth) + "' WHERE `objectID` = '" << objid << "';";
+	Database::Query(eqqr.str());
+}
+
+float CharactersTable::getCharacterMaxHealth(long long objid){
+	std::stringstream qrs;
+	qrs << "SELECT `maxHealth` FROM `characters` WHERE `objectID` = '" << std::to_string(objid) << "';";
+	std::string qrss = qrs.str();
+	auto qr = Database::Query(qrss);
+
+	if (mysql_num_rows(qr) == 0 ){
+		return 0;
+	}
+	else{
+		auto r = mysql_fetch_row(qr);
+		return std::stof(r[0]);
+	}
+}
+
+// Character Imagination
+void CharactersTable::setCharacterImagination(long long objid, unsigned long imagination){
+    PlayerObject *player = (PlayerObject *)ObjectsManager::getObjectByID(objid);
+    DestructibleComponent *c7 = player->getComponent7();
+    COMPONENT7_DATA4 d4 = c7->getData4();
+    
+	float maxImagination = CharactersTable::getCharacterMaxImagination(objid);
+	if (imagination > maxImagination){
+		imagination = maxImagination;
+	}
+
+    // Updating imagination seems to have the same problem as updating uScore,
+	// Look into ObjectsManager::serialize to see what is actually going on
+    d4.imagination = imagination;
+    c7->setData4(d4);
+    ObjectsManager::serialize(player);
+
+	std::stringstream eqqr;
+	eqqr << "UPDATE `characters` SET `imagination`='" + std::to_string(imagination) + "' WHERE `objectID` = '" << objid << "';";
+	Database::Query(eqqr.str());
+}
+
+unsigned long CharactersTable::getCharacterImagination(long long objid){
+    std::stringstream qrs;
+    qrs << "SELECT `imagination` FROM `characters` WHERE `objectID` = '" << std::to_string(objid) << "';";
+    std::string qrss = qrs.str();
+    auto qr = Database::Query(qrss);
+    
+    if (mysql_num_rows(qr) == 0 ){
+        return 0;   
+    }
+    else{
+        auto r = mysql_fetch_row(qr);
+        return std::stol(r[0]);        
+    }
+}
+
+void CharactersTable::setCharacterMaxImagination(long long objid, float maxImagination){
+    PlayerObject *player = (PlayerObject *)ObjectsManager::getObjectByID(objid);
+    DestructibleComponent *c7 = player->getComponent7();
+    COMPONENT7_DATA4 d4 = c7->getData4();
+    
+    d4.maxImagination = maxImagination;
+	d4.maxImaginationN = maxImagination;
+    c7->setData4(d4);
+    ObjectsManager::serialize(player);
+    
+    std::stringstream eqqr;
+    eqqr << "UPDATE `characters` SET `maxImagination`='" + std::to_string(maxImagination) + "' WHERE `objectID` = '" << objid << "';";
+	Database::Query(eqqr.str());
+}
+
+float CharactersTable::getCharacterMaxImagination(long long objid){
+	std::stringstream qrs;
+	qrs << "SELECT `maxImagination` FROM `characters` WHERE `objectID` = '" << std::to_string(objid) << "';";
+	std::string qrss = qrs.str();
+	auto qr = Database::Query(qrss);
+
+	if (mysql_num_rows(qr) == 0 ){
+		return 0;
+	}
+	else{
+		auto r = mysql_fetch_row(qr);
+		return std::stof(r[0]);
+	}
+}
+
+// Character Armor
+void CharactersTable::setCharacterArmor(long long objid, unsigned long armor){
+    PlayerObject *player = (PlayerObject *)ObjectsManager::getObjectByID(objid);
+    DestructibleComponent *c7 = player->getComponent7();
+    COMPONENT7_DATA4 d4 = c7->getData4();
+    
+	float maxArmor = CharactersTable::getCharacterMaxArmor(objid);
+	if (armor > maxArmor){
+		armor = maxArmor;
+	}
+
+    d4.armor = armor;
+    c7->setData4(d4);
+    ObjectsManager::serialize(player);
+
+	std::stringstream eqqr;
+	eqqr << "UPDATE `characters` SET `armor`='" + std::to_string(armor) + "' WHERE `objectID` = '" << objid << "';";
+	Database::Query(eqqr.str());
+}
+
+unsigned long CharactersTable::getCharacterArmor(long long objid){
+    std::stringstream qrs;
+    qrs << "SELECT `armor` FROM `characters` WHERE `objectID` = '" << std::to_string(objid) << "';";
+    std::string qrss = qrs.str();
+    auto qr = Database::Query(qrss);
+    
+    if (mysql_num_rows(qr) == 0 ){
+        return 0;   
+    }
+    else{
+        auto r = mysql_fetch_row(qr);
+        return std::stol(r[0]);        
+    }
+}
+
+void CharactersTable::setCharacterMaxArmor(long long objid, float maxArmor){
+    PlayerObject *player = (PlayerObject *)ObjectsManager::getObjectByID(objid);
+    DestructibleComponent *c7 = player->getComponent7();
+    COMPONENT7_DATA4 d4 = c7->getData4();
+    
+    d4.maxArmor = maxArmor;
+	d4.maxArmorN = maxArmor;
+    c7->setData4(d4);
+    ObjectsManager::serialize(player);
+    
+    std::stringstream eqqr;
+    eqqr << "UPDATE `characters` SET `maxArmor`='" + std::to_string(maxArmor) + "' WHERE `objectID` = '" << objid << "';";
+	Database::Query(eqqr.str());
+}
+
+float CharactersTable::getCharacterMaxArmor(long long objid){
+	std::stringstream qrs;
+	qrs << "SELECT `maxArmor` FROM `characters` WHERE `objectID` = '" << std::to_string(objid) << "';";
+	std::string qrss = qrs.str();
+	auto qr = Database::Query(qrss);
+
+	if (mysql_num_rows(qr) == 0 ){
+		return 0;
+	}
+	else{
+		auto r = mysql_fetch_row(qr);
+		return std::stof(r[0]);
+	}
+}
+
 // To do:
 // Check if player is valid for level up,
 // Reset player uScore (Or take the current value minus the required value) upon level up
@@ -270,9 +471,25 @@ void CharactersTable::resurrectCharacter(long long objid, bool bRezImmediately){
 void CharactersTable::levelCharacter(long long objid){
 	auto qr1 = Database::Query("SELECT `level` FROM `characters` WHERE `objectID` = '" + std::to_string(objid) + "';");
 	if (mysql_num_rows(qr1) > 0){
+		// Perform calculations
 		auto r = mysql_fetch_row(qr1);
 		unsigned long level = std::stol(r[0]) + 1;
 
+		// Construct Packet
+		RakNet::BitStream *bs = WorldServer::initPacket(RemoteConnection::CLIENT, ClientPacketID::SERVER_GAME_MSG);
+	    bs->Write(objid);
+	    bs->Write((unsigned short)1735);
+		bs->Write((int)level);
+		bs->Write((bool)0);
+
+		// Send Packet
+		SessionInfo s = SessionsTable::getClientSession(SessionsTable::findCharacter(objid));
+		std::vector<SessionInfo> sessionsz = SessionsTable::getClientsInWorld(s.zone);
+	    for (unsigned int k = 0; k < sessionsz.size(); k++){
+	    	WorldServer::sendPacket(bs, sessionsz.at(k).addr);
+	    }
+
+		// Update database
 		std::stringstream eqqr;
 		eqqr << "UPDATE `characters` SET `level`='" + std::to_string(level) + "' WHERE `objectID` = '" << objid << "';";
 	    Database::Query(eqqr.str());
@@ -298,10 +515,6 @@ unsigned long CharactersTable::getCharacterLevel(long long objid){
 
 }
 
-// To do:
-// Update uScore in real time,
-// And fix wrong uScore amount in player satistics menu
-// Get rid of all these lame 'To do' comments when you're done with them
 void CharactersTable::addCharacterUScore(long long objid, long long score){
 	auto qr1 = Database::Query("SELECT `uScore` from `characters` WHERE `objectID` = '" + std::to_string(objid) + "';");
 	if (mysql_num_rows(qr1) > 0){
@@ -310,26 +523,25 @@ void CharactersTable::addCharacterUScore(long long objid, long long score){
 		auto r = mysql_fetch_row(qr1);
 		long long finalScore = std::stoll(r[0]) + score;
 
-		SessionInfo s = SessionsTable::getClientSession(SessionsTable::findCharacter(objid));
-		// Attempt to update the players uScore in real time, but I can't, for the life of me, figure out how. .
-		/*
-		ListCharacterInfo cinfo = CharactersTable::getCharacterInfo(objid);
-		PlayerObject *player = (PlayerObject *)ObjectsManager::getObjectByID(s.activeCharId);
-		CharacterComponent *c4 = player->getComponent4();
-		PLAYER_INFO pi;
-		pi.accountID = s.accountid;
-		pi.isFreeToPlay = cinfo.info.isFreeToPlay;
+		// Update in real time ~ Does not work
+	// Notes:
+		// uScore is updated on server join,
+		// but not on world switch
+		PlayerObject *player = (PlayerObject *)ObjectsManager::getObjectByID(objid);
+        CharacterComponent *c4 = player->getComponent4();
+        PLAYER_INFO pi;
 		pi.legoScore = finalScore;
 		c4->setInfo(pi);
-
 		ObjectsManager::serialize(player);
-		*/
+
+		SessionInfo s = SessionsTable::getClientSession(SessionsTable::findCharacter(objid));
 
 		// Construct Packet
 	    RakNet::BitStream *bs = WorldServer::initPacket(RemoteConnection::CLIENT, ClientPacketID::SERVER_GAME_MSG);
 	    bs->Write(objid);
 	    bs->Write((unsigned short)1459);
 		bs->Write((long long)finalScore);
+		bs->Write((int)0);
 
 		// Send Packet
 		std::vector<SessionInfo> sessionsz = SessionsTable::getClientsInWorld(s.zone);

@@ -47,6 +47,10 @@ struct CharacterAttributes{
 	long long uScore = 0;
 	unsigned long health = 4;
 	float maxHealth = 4.0f;
+	unsigned long imagination = 0;
+	float maxImagination = 0.0f;
+	unsigned long armor = 0;
+	float maxArmor = 0.0f;
 };
 
 struct ListCharacterInfo{
@@ -72,15 +76,34 @@ public:
 	static long long add(CharacterStyle style, unsigned int accountid, CharacterInfo names);
 	static bool unapprovedNameExists(std::string unapprovedname);
 	static void setGMlevel(long long objid, unsigned short newLevel);
+
 	static bool isCharacterAlive(long long objid);
 	static void killCharacter(long long objid);
 	static void resurrectCharacter(long long objid, bool bRezImmediately = false);
+
+	static void setCharacterHealth(long long objid, unsigned long health);
+    static unsigned long getCharacterHealth(long long objid);
+	static void setCharacterMaxHealth(long long objid, float maxHealth);
+	static float getCharacterMaxHealth(long long objid);
+
+	static void setCharacterImagination(long long objid, unsigned long imagination);
+	static unsigned long getCharacterImagination(long long objid);
+	static void setCharacterMaxImagination(long long objid, float maxImagination);
+	static float getCharacterMaxImagination(long long objid);
+
+	static void setCharacterArmor(long long objid, unsigned long armor);
+	static unsigned long getCharacterArmor(long long objid);
+	static void setCharacterMaxArmor(long long objid, float maxArmor);
+	static float getCharacterMaxArmor(long long objid);
+
 	static void levelCharacter(long long objid);
 	static unsigned long getCharacterLevel(long long objid);
 	static void addCharacterUScore(long long objid, long long score);
 	static long long getCharacterUScore(long long objid);
+
 	static void setCharacterMoney(long long objid, long long currency);
 	static long long getCharacterCurrency(long long objid);
+
 	static void CharactersTable::setCharacterName(long long objid, std::string newName);
 };
 

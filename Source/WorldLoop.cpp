@@ -1390,9 +1390,12 @@ void parsePacket(RakPeerInterface* rakServer, SystemAddress &systemAddress, RakN
 				d4.health = cinfo.attribute.health;
 				d4.maxHealthN = cinfo.attribute.maxHealth;
 				d4.maxHealth = cinfo.attribute.maxHealth;
-				d4.imagination = 20;
-				d4.maxImagination = 20.0F;
-				d4.maxImaginationN = 20.0F;
+				d4.imagination = cinfo.attribute.imagination;
+				d4.maxImagination = cinfo.attribute.maxImagination;
+				d4.maxImaginationN = cinfo.attribute.maxImagination;
+				d4.armor = cinfo.attribute.armor;
+				d4.maxArmor = cinfo.attribute.maxArmor;
+				d4.maxArmorN = cinfo.attribute.maxArmor;
 				c7->setData4(d4);
 
 				InventoryComponent *c17 = player->getComponent17();

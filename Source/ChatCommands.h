@@ -5,6 +5,16 @@
 #include <iomanip>
 #include <unordered_map>
 
+
+//#define noDenyMessage
+#ifdef noDenyMessage
+#define commandAccessDenied()
+
+#else
+#define commandAccessDenied() Chat::sendChatMessage(s->addr, L"You don't have permission to use this command!");
+
+#endif
+
 class ChatCommandHandler{
 public:
 	virtual void handleCommand(SessionInfo *s, std::vector<std::wstring> * params) = 0;

@@ -692,16 +692,20 @@ struct COMPONENT4_DATA11{
 class CharacterComponent : public ReplicaComponent{
 private:
 	//Index 24
+	// Part 1
 	bool flag1;
 	bool flag1_1;
 	unsigned long long data1_1;
 	unsigned char data1_2;
 	//Index 27
+	// Part 2
 	bool hasLevel;
 	unsigned long level;
 	//Index 28
+	// Part 3
 	bool flag3;
 	COMPONENT4_DATA3 data3;
+	// Part 4
 	bool flag4;
 	unsigned long long data4;
 	bool flag5;
@@ -710,18 +714,25 @@ private:
 	unsigned long long data6;
 	bool flag7;
 	unsigned long long data7;
+
 	PLAYER_STYLE style;
 	PLAYER_INFO info;
 	PLAYER_STATS stats;
+
 	bool flag8a;
 	bool flag8b;
 	std::wstring data8;
+
+
 	bool flag9;
 	COMPONENT4_DATA9 data9;
+
 	bool flag10;
 	unsigned long data10;
+
 	bool flag11;
 	COMPONENT4_DATA11 data11;
+
 public:
 	CharacterComponent();
 	~CharacterComponent();

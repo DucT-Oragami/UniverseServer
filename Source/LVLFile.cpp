@@ -17,6 +17,8 @@ LVLFile::LVLFile(std::string filename, std::string scenename, unsigned long vers
 		unsigned char u8;
 		float f;
 
+		// Perhaps, if we're fortunate, one of the values here contains mission info
+		// ~ What missions are attached to the object/npc
 		while ((file.GetNumberOfUnreadBits() / 8) > 0) {
 			std::string cur = "";
 
@@ -58,6 +60,7 @@ LVLFile::LVLFile(std::string filename, std::string scenename, unsigned long vers
 
 						if (version >= 0x20)
 							file.Read(u32);
+						    
 
 						file.Read(info.posX);
 						file.Read(info.posY);

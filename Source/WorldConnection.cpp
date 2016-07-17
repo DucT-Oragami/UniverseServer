@@ -5,6 +5,7 @@
 #include "Logger.h"
 #include "UtfConverter.h"
 #include "AccountsDB.h"
+#include "MissionDB.h"
 #include "InventoryDB.h"
 #include "WorldServer.h"
 #include "LDF.h"

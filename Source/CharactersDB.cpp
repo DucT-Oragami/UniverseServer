@@ -784,57 +784,6 @@ void FriendsTable::decline(long long requester, long long accepter){
 	FriendsTable::setRequestStatus(requester, accepter, "DECLINED");
 }
 
-std::vector<MISSION_DATA> MissionsTable::getMissions(long long charid){
-	std::string qr = "SELECT `missionid`, `count`, UNIX_TIMESTAMP(`time`) FROM `missions` WHERE `character` = '" + std::to_string(charid) + "';";
-	auto qr2 = Database::Query(qr);
-	std::vector<MISSION_DATA> missions;
-	if (qr2 == NULL){
-		Logger::logError("CHDB", "MYSQL", "getting mission", mysql_error(Database::getConnection()));
-	}
-	if (qr2 == NULL || mysql_num_rows(qr2) == 0)
-		return missions;
-	else{
-		unsigned int numrows = (unsigned int)mysql_num_rows(qr2);
-		missions.reserve(numrows);
-		MYSQL_ROW row;
-		while (row = mysql_fetch_row(qr2)) {
-			MISSION_DATA m;
-			m.missionid = std::stoi(row[0]);
-			m.missioncount = std::stoi(row[1]);
-			m.timestamp = std::stoi(row[2]);
-			missions.push_back(m);
-		}
-		return missions;
-	}
-}
-
-void MissionsTable::addMission(long long charid, unsigned long missionid){
-	std::stringstream eqqr;
-	eqqr << "INSERT INTO `luni`.`missions` (`id`, `character`, `missionid`) VALUES(NULL, '" << charid << "', '" << missionid << "');";
-	Database::Query(eqqr.str());
-}
-
-void MissionsTable::deleteMissions(long long charid){
-	std::stringstream eqqr;
-	eqqr << "DELETE FROM `missions` WHERE `character`='" << charid << "';";
-	Database::Query(eqqr.str());
-}
-
-void MissionsTable::offerMission(long long charid, unsigned long missionid, unsigned long offererid) {
-	SessionInfo s = SessionsTable::getClientSession(SessionsTable::findCharacter(charid));
-	RakNet::BitStream *bs = WorldServer::initPacket(RemoteConnection::CLIENT, ClientPacketID::SERVER_GAME_MSG);
-
-	bs->Write(s.activeCharId);
-	bs->Write((unsigned short)248);
-	bs->Write((unsigned long)missionid);
-	bs->Write((unsigned long)offererid);
-
-	std::vector<SessionInfo> sessionsz = SessionsTable::getClientsInWorld(s.zone);
-	for (unsigned int k = 0; k < sessionsz.size(); k++){
-		WorldServer::sendPacket(bs, sessionsz.at(k).addr);
-	}
-}
-
 void MailsTable::addMail(MailData data){
 	std::stringstream query2;
 	query2 << "INSERT INTO `mails` (`sender`, `recipient_id`, `subject`, `text`, `attachment`, `attachment_count`) ";

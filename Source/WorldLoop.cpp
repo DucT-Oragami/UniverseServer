@@ -163,6 +163,8 @@ void WorldLoop() {
 	WorldServer::setUnavailable("The server is loading resources! Please try again in a few seconds...");
 	std::vector<unsigned long long> objects = WorldObjectsTable::getObjects();
 
+	// To do:
+	// Dynamically load all luz/lvl files
 	std::vector<std::string> luzFiles;
 	
 	luzFiles.push_back("nd_space_ship.luz");

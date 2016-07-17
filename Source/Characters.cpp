@@ -2,6 +2,7 @@
 
 #include "CharactersDB.h"
 #include "AccountsDB.h"
+#include "MissionDB.h"
 #include "InventoryDB.h"
 #include "Packet.h"
 #include "UtfConverter.h"

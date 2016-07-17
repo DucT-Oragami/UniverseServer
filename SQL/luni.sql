@@ -192,6 +192,11 @@ CREATE TABLE IF NOT EXISTS `world_objects` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+CREATE TABLE IF NOT EXIST `world_missions` (
+  `temp` bit NOT NULL 1,
+  `missionID` bigint(20) NOT NULL 0,
+  `giverID` bigint(20) NOT NULL 0
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 ALTER TABLE `instances` ADD FULLTEXT KEY `server_address` (`server_address`);
 

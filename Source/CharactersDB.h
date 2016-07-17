@@ -127,20 +127,6 @@ public:
 	static void decline(long long requester, long long accepter);
 };
 
-struct MISSION_DATA{
-	int missionid;
-	char missioncount;
-	time_t timestamp;
-};
-
-class MissionsTable {
-public:
-	static std::vector<MISSION_DATA> getMissions(long long charid);
-	static void addMission(long long charid, unsigned long missionid);
-	static void deleteMissions(long long charid);
-	static void offerMission(long long charid, unsigned long missionid, unsigned long offererid);
-};
-
 struct MailData{
 	long long id;
 	std::string sender;

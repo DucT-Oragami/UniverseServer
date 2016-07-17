@@ -132,6 +132,7 @@
     <ClInclude Include="LootObject.h" />
     <ClInclude Include="LUZFile.h" />
     <ClInclude Include="LVLFile.h" />
+    <ClInclude Include="MissionDB.h" />
     <ClInclude Include="sha512.h" />
     <ClInclude Include="NPCObject.h" />
     <ClInclude Include="ObjectID.h" />
@@ -186,6 +187,7 @@
     <ClCompile Include="LUZFile.cpp" />
     <ClCompile Include="LVLFile.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MissionDB.cpp" />
     <ClCompile Include="sha512.cpp" />
     <ClCompile Include="NPCObject.cpp" />
     <ClCompile Include="ObjectID.cpp" />

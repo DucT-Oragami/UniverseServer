@@ -31,6 +31,7 @@ void initializeLaunchPad(long long objid, ZoneId zone, ZoneId target, std::strin
 
 void initializeObjects(){
 	//Collecting all objectids from every zone
+	// It would be really nice if npcs had consistent ids just like these objects below. .
 	initializeLaunchPad(70368746922751, ZoneId::CRUX_PRIME, ZoneId::NEXUS_TOWER);
 
 	initializeLaunchPad(70368747133960, ZoneId::AVANT_GROVE, ZoneId::AVANT_GARDENS);

@@ -231,6 +231,9 @@
     <ClInclude Include="tracer.h">
       <Filter>Header Files\Common\Utility</Filter>
     </ClInclude>
+    <ClInclude Include="MissionDB.h">
+      <Filter>Header Files\Database</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -376,6 +379,9 @@
     </ClCompile>
     <ClCompile Include="sha512.cpp">
       <Filter>Source Files\Common\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="MissionDB.cpp">
+      <Filter>Source Files\Database</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -39,3 +39,4 @@ struct World {
 };
 
 bool operator==(const World& left, const World& right);
+void initWorldServers();

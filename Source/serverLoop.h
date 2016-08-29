@@ -40,7 +40,8 @@ void SavePacketOverwrite(const std::string& filename, char* data, unsigned int s
 
 // Thse are the threads of the Authentication, Character, and World servers
 void AuthLoop();
-void WorldLoop();
+void WorldLoop(const char * world, const char * luzFile, const char * luzPath);
+void initWorldServers();
 
 void parsePacket(RakPeerInterface* rakServer, SystemAddress &systemAddress, RakNet::BitStream *data, unsigned long bytelength);
 bool handleObject(ObjectInformation obj, RakPeerInterface* rakServer, SystemAddress &systemAddress);

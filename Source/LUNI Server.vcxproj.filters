@@ -234,6 +234,9 @@
     <ClInclude Include="MissionDB.h">
       <Filter>Header Files\Database</Filter>
     </ClInclude>
+    <ClInclude Include="dirent.h">
+      <Filter>Header Files\Common\Utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -382,6 +385,9 @@
     </ClCompile>
     <ClCompile Include="MissionDB.cpp">
       <Filter>Source Files\Database</Filter>
+    </ClCompile>
+    <ClCompile Include="MasterWorldLoop.cpp">
+      <Filter>Source Files\Service</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -1,13 +1,13 @@
 # LUNI v0.8-pre
-# This repository is a fork of the Ion Universe Public Server in an attempt to make the sufficient changes/fixes to get the project working.
+# Experimental code for the LUNI project, expect lots of bugs and missing features.
 
-1) Server Issues
+1) Overview
   
-  - The server runs on CuzitsJonny's source code. I give him full credit as I did not make this code. Its not a full version of LEGO Universe which means it can be unstable
+  - Planned changes and current issues are posted in the "Issues" section
   
-  - The message "Server Is Under Maintence" means the world server crashed. Give it a few minutes to restart
+  - Because of the unstability of this code, it is not meant to be used by public servers
   
-  - The message "Server Is loading resources" is self explanitory, give it a few seconds. If you spam the Enter button you will promted with a message saying to update your client. If you do, just close the client and re-open it.
+  - Feel free to fork this repository and makes changes to it - it would take years (give or take) to do this alone D;
 
 2) Other Repositories
 

@@ -13,7 +13,7 @@ enum LogLevels : unsigned char{
 };
 
 #ifdef DEBUG
-const LogLevels activeLogLevel = LogLevels::LOG_DEBUG;
+const LogLevels activeLogLevel = LogLevels::LOG_ALL;
 #else
 const LogLevels activeLogLevel = LogLevels::LOG_NORMAL;
 #endif

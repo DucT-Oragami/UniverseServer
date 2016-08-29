@@ -165,13 +165,10 @@ SessionInfo SessionsTable::connect(SystemAddress address){
 }
 
 bool SessionsTable::disconnect(SystemAddress address){
-	/*auto fnd = sessions.find(address);
-	if (fnd == sessions.end()) return false;
-	sessions.erase(address);*/
-	//TODO: Some kind of check if this server is responsible for the session
-	std::stringstream str;
-	str << "DELETE FROM `sessions` WHERE `ipaddress` = '" << address.ToString() << "'";
-	Database::Query(str.str());
+	std::stringstream str2;
+	str2 << "WAITFOR DELAY '00:00:05';";
+	str2 << "DELETE FROM `sessions` WHERE `ipaddress` = '" << address.ToString() << "'";
+	Database::Query(str2.str());
 	return true;
 }
 
@@ -250,6 +247,7 @@ SessionInfo SessionsTable::logout(unsigned int accountid){
 			s.phase = SessionPhase::PHASE_CONNECTED;
 			s.accountid = 0;
 			std::stringstream str;
+			str << "WAITFOR DELAY '00:00:05';";
 			str << "UPDATE `sessions` SET `phase` = '" << std::to_string((unsigned char)s.phase) << "', `accountid` = '" << std::to_string(s.accountid) << "' WHERE `ipaddress` = '" << addr.ToString() << "'";
 			auto qr = Database::Query(str.str());
 			if (qr == NULL){
@@ -343,6 +341,7 @@ SessionInfo SessionsTable::quit(long long charid){
 			s.worldJoin = 0;
 			s.activeCharId = -1;
 			std::stringstream str;
+			str << "WAITFOR DELAY '00:00:05';";
 			str << "UPDATE `sessions` SET `phase` = '" << std::to_string((unsigned char)s.phase) << "', `charid` = '" << std::to_string(s.activeCharId) << "' WHERE `ipaddress` = '" << addr.ToString() << "'";
 			auto qr = Database::Query(str.str());
 			if (qr == NULL){
@@ -481,8 +480,16 @@ std::vector<SessionInfo> SessionsTable::getClientsInInstance(int instanceid){
 	}
 }
 
-void SessionsTable::setInstanceId(unsigned int accountid, int instanceid){
+/*void SessionsTable::setInstanceId(unsigned int accountid, int instanceid){
 	SystemAddress addr = SessionsTable::findAccount(accountid);
+	if (addr != UNASSIGNED_SYSTEM_ADDRESS){
+		std::stringstream str;
+		str << "UPDATE `sessions` SET `instanceid` = '" << std::to_string(instanceid) << "' WHERE `ipaddress` = '" << addr.ToString() << "'";
+		auto qr = Database::Query(str.str());
+	}
+}*/
+
+void SessionsTable::setInstanceId(SystemAddress addr, int instanceid){
 	if (addr != UNASSIGNED_SYSTEM_ADDRESS){
 		std::stringstream str;
 		str << "UPDATE `sessions` SET `instanceid` = '" << std::to_string(instanceid) << "' WHERE `ipaddress` = '" << addr.ToString() << "'";

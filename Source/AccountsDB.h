@@ -105,7 +105,8 @@ public:
 	static SystemAddress findCharacter(long long charid);
 	static std::vector<SessionInfo> getClientsInWorld(unsigned short zoneid);
 	static std::vector<SessionInfo> getClientsInInstance(int instanceid);
-	static void setInstanceId(unsigned int accountid, int instanceid);
+	//static void setInstanceId(unsigned int accountid, int instanceid);
+	static void setInstanceId(SystemAddress addr, int instanceid);
 
 	//Worlds
 	static SessionInfo enter(long long charid, unsigned short zoneId);

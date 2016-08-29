@@ -57,7 +57,8 @@
 #include <chrono>
 #include <thread>
 
-void WorldLoop() {
+
+void WorldLoop(const char *world, const char *luzFile, const char *luzPath){
 	// Initialize the RakPeerInterface used throughout the entire server
 	RakPeerInterface* rakServer = RakNetworkFactory::GetRakPeerInterface();
 
@@ -72,25 +73,25 @@ void WorldLoop() {
 	InitSecurity(rakServer, Config::getUseEncryption());
 
 	// Initialize the SocketDescriptor
-	SocketDescriptor socketDescriptor(Config::getPort("World"), 0);
+	SocketDescriptor socketDescriptor(Config::getWorldPort(world), 0);
 
 	SystemAddress ServerAddress;
 	ServerAddress.SetBinaryAddress(Config::getIP("World").c_str());
-	ServerAddress.port = Config::getPort("World");
+	ServerAddress.port = Config::getWorldPort(world);
 	
 	// If the startup of the server is successful, print it to the console
 	// Otherwise, quit the server (as the char server is REQUIRED for the
 	// server to function properly)
 	if (rakServer->Startup(40, 30, &socketDescriptor, 1)) {
-		Logger::log("WRLD", "", "started! Listening on port " + std::to_string(Config::getPort("World")));
-		Instances::registerInstance(ServerAddress);
+		Logger::log("WRLD", world, "started! Listening on port " + std::to_string(ServerAddress.port));
+		Instances::registerInstance(ServerAddress, world, Config::getWorldID(world));
 	} else exit(2);
 
-	// Set max incoming connections to 8
 	rakServer->SetMaximumIncomingConnections(40);
 
 	// If msgFileHandler is not NULL, save logs of char server
-	if (msgFileHandler != NULL) msgFileHandler->StartLog(".\\logs\\world");
+	if (msgFileHandler != NULL) msgFileHandler->StartLog(std::string(".\\logs\\world_"+std::string(world)).c_str());
+	//if (msgFileHandler != NULL) msgFileHandler->StartLog(std::string(".\\logs\\" + std::string(world) + "\\" + std::string(world) + "\\").c_str());
 
 	// Initialize the Packet class for the packets
 	Packet* packet;
@@ -122,6 +123,8 @@ void WorldLoop() {
 
 	//Before we start handling packets, we set this RakPeer as the world server of this instance
 	WorldServer::publishWorldServer(rakServer, &replicaManager, ServerAddress);
+
+	//rakServer->Connect(host, hostPort, 0, 0,
 
 	ChatCommandManager::registerCommands(new FlightCommandHandler());
 	ChatCommandManager::registerCommands(new TeleportCommandHandler());
@@ -159,100 +162,109 @@ void WorldLoop() {
 	//objects.~xml_document();
 	//Logger::log("WRLD", "OBJECTS", "Finished registering LOTInfo!");
 
-	Logger::log("WRLD", "NPCs", "Starting to register world objects...");
-	WorldServer::setUnavailable("The server is loading resources! Please try again in a few seconds...");
-	std::vector<unsigned long long> objects = WorldObjectsTable::getObjects();
+    WorldServer::setUnavailable("The server is loading resources. Please try again soon");
+    if (Config::getLoadObjects()){
+        Logger::log("WRLD", "NPCs", "Starting to register world objects...");
+        std::vector<unsigned long long> objects = WorldObjectsTable::getObjects();
 
-	// To do:
-	// Dynamically load all luz/lvl files
-	std::vector<std::string> luzFiles;
-	
-	luzFiles.push_back("nd_space_ship.luz");
-	// luzFiles.push_back("nd_avant_gardens.luz");
-	// luzFiles.push_back("nd_nimbus_station.luz");
+        // To do:
+        // Dynamically load all luz/lvl files
+        std::vector<std::string> luzFiles;
+        if (std::string(world) != "EMPTY") luzFiles.push_back(luzFile);
+        
+        // luzFiles.push_back("nd_space_ship.luz");
+        // luzFiles.push_back("nd_avant_gardens.luz");
+        // luzFiles.push_back("nd_nimbus_station.luz");
 
-	for (int i = 0; i < luzFiles.size(); i++) {
-		std::vector<unsigned char> data = OpenPacket(".\\Files\\" + luzFiles.at(i));
+        for (int i = 0; i < luzFiles.size(); i++) {
+            //std::vector<unsigned char> data = OpenPacket(".\\Files\\" + luzFiles.at(i));
+            Logger::log("WRLD", "Load", luzFiles.at(i), LOG_CRITICAL);
+            std::vector<unsigned char> data = OpenPacket(luzFiles.at(i));
 
-		LUZFile luzFile = LUZFile(data);
+            LUZFile luzFile = LUZFile(data, luzPath);
 
-		std::vector<LVLFile> children = luzFile.getChildren();
+            std::vector<LVLFile> children = luzFile.getChildren();
 
-		for (int k = 0; k < children.size(); k++) {
-			std::vector<WorldObjectInfo> objects = children.at(k).getObjects();
+            for (int k = 0; k < children.size(); k++) {
+                std::vector<WorldObjectInfo> objects = children.at(k).getObjects();
+				std::string strChildren = std::to_string(children.size()+1);
+				Logger::log("WRLD", "Load", "Child " + std::to_string(k+1) + "/" + strChildren, LOG_CRITICAL);
 
-			for (int l = 0; l < objects.size(); l++) {
-				WorldObjectInfo info = objects.at(l);
+                for (int l = 0; l < objects.size(); l++) {
+                    WorldObjectInfo info = objects.at(l);
 
-				std::string type = CDClientDB::getObjectType(info.LOT);
+                    std::string type = CDClientDB::getObjectType(info.LOT);
 
-				if (type == "NPC" || type == "UserGeneratedNPCs") {
-					NPCObject *npc = new NPCObject(info.LOT, info.zone);
-					npc->name = info.name;
-					npc->setPosition(info.posX, info.posY, info.posZ);
-					npc->setRotation(info.rotX, info.rotY, info.rotZ, info.rotW);
+                    if (type == "NPC" || type == "UserGeneratedNPCs") {
+                        NPCObject *npc = new NPCObject(info.LOT, info.zone);
+                        npc->name = info.name;
+                        npc->setPosition(info.posX, info.posY, info.posZ);
+                        npc->setRotation(info.rotX, info.rotY, info.rotZ, info.rotW);
 
-					ObjectsManager::registerObject(npc);
-				}
+                        ObjectsManager::registerObject(npc);
+                    }
 
-				else if (type == "Environmental" || type == "MovingPlatforms" || type == "Smashables") {
-					EnvironmentalObject *environmental = new EnvironmentalObject(info.LOT, info.zone);
-					environmental->setPosition(info.posX, info.posY, info.posZ);
-					environmental->setRotation(info.rotX, info.rotY, info.rotZ, info.rotW);
+                    else if (type == "Environmental" || type == "MovingPlatforms" || type == "Smashables") {
+                        EnvironmentalObject *environmental = new EnvironmentalObject(info.LOT, info.zone);
+                        environmental->setPosition(info.posX, info.posY, info.posZ);
+                        environmental->setRotation(info.rotX, info.rotY, info.rotZ, info.rotW);
 
-					ObjectsManager::registerObject(environmental);
-				}
+                        ObjectsManager::registerObject(environmental);
+                    }
 
-				else if (type == "Enemies") {
-					EnemyObject *enemies = new EnemyObject(info.LOT, info.zone);
-					enemies->name = info.name;
-					enemies->setPosition(info.posX, info.posY, info.posZ);
-					enemies->setRotation(info.rotX, info.rotY, info.rotZ, info.rotW);
+                    else if (type == "Enemies") {
+                        EnemyObject *enemies = new EnemyObject(info.LOT, info.zone);
+                        enemies->name = info.name;
+                        enemies->setPosition(info.posX, info.posY, info.posZ);
+                        enemies->setRotation(info.rotX, info.rotY, info.rotZ, info.rotW);
 
-					ObjectsManager::registerObject(enemies);
-				}
-			}
-		}
-	}
-	
-	if (objects.size() > 0){
-		for (int i = 0; i < objects.size(); i++){
-			WorldObjectInfo info = WorldObjectsTable::getObjectInfo(objects.at(i));
+                        ObjectsManager::registerObject(enemies);
+                    }
+					std::string strObjects = std::to_string(objects.size()+1);
+					Logger::log("WRLD", "Load", "Object " + std::to_string(l+1) + "/" + strObjects, LOG_CRITICAL);
+                }
+            }
+        }
+        
+        if (objects.size() > 0){
+            for (int i = 0; i < objects.size(); i++){
+                WorldObjectInfo info = WorldObjectsTable::getObjectInfo(objects.at(i));
 
-			std::string type = CDClientDB::getObjectType(info.LOT);
+                std::string type = CDClientDB::getObjectType(info.LOT);
 
-			if (type == "NPC" || type == "UserGeneratedNPCs") {
-				NPCObject *npc = new NPCObject(info.LOT, info.zone);
-				npc->name = info.name;
-				npc->setPosition(info.posX, info.posY, info.posZ);
-				npc->setRotation(info.rotX, info.rotY, info.rotZ, info.rotW);
+                if (type == "NPC" || type == "UserGeneratedNPCs") {
+                    NPCObject *npc = new NPCObject(info.LOT, info.zone);
+                    npc->name = info.name;
+                    npc->setPosition(info.posX, info.posY, info.posZ);
+                    npc->setRotation(info.rotX, info.rotY, info.rotZ, info.rotW);
 
-				WorldObjectsTable::updateTempObjID(objects.at(i), npc->objid);
-				ObjectsManager::registerObject(npc);
-			}
+                    WorldObjectsTable::updateTempObjID(objects.at(i), npc->objid);
+                    ObjectsManager::registerObject(npc);
+                }
 
-			else if (type == "Environmental" || type == "MovingPlatforms" || type == "LEGO brick" || type == "Loot" || type == "Smashables" || type == "Rebuildables" || type == "LUP") {
-				EnvironmentalObject *environmental = new EnvironmentalObject(info.LOT, info.zone);
-				environmental->setPosition(info.posX, info.posY, info.posZ);
-				environmental->setRotation(info.rotX, info.rotY, info.rotZ, info.rotW);
+                else if (type == "Environmental" || type == "MovingPlatforms" || type == "LEGO brick" || type == "Loot" || type == "Smashables" || type == "Rebuildables" || type == "LUP") {
+                    EnvironmentalObject *environmental = new EnvironmentalObject(info.LOT, info.zone);
+                    environmental->setPosition(info.posX, info.posY, info.posZ);
+                    environmental->setRotation(info.rotX, info.rotY, info.rotZ, info.rotW);
 
-				WorldObjectsTable::updateTempObjID(objects.at(i), environmental->objid);
-				ObjectsManager::registerObject(environmental);
-			}
+                    WorldObjectsTable::updateTempObjID(objects.at(i), environmental->objid);
+                    ObjectsManager::registerObject(environmental);
+                }
 
-			else if (type == "Enemies") {
-				EnemyObject *enemies = new EnemyObject(info.LOT, info.zone);
-				enemies->name = info.name;
-				enemies->setPosition(info.posX, info.posY, info.posZ);
-				enemies->setRotation(info.rotX, info.rotY, info.rotZ, info.rotW);
+                else if (type == "Enemies") {
+                    EnemyObject *enemies = new EnemyObject(info.LOT, info.zone);
+                    enemies->name = info.name;
+                    enemies->setPosition(info.posX, info.posY, info.posZ);
+                    enemies->setRotation(info.rotX, info.rotY, info.rotZ, info.rotW);
 
-				WorldObjectsTable::updateTempObjID(objects.at(i), enemies->objid);
-				ObjectsManager::registerObject(enemies);
-			}
-		}
-	}
-	WorldServer::setAvailable();
-	Logger::log("WRLD", "NPCs", "Finished registering world objects!");
+                    WorldObjectsTable::updateTempObjID(objects.at(i), enemies->objid);
+                    ObjectsManager::registerObject(enemies);
+                }
+            }
+        }
+        Logger::log("WRLD", "NPCs", "Finished registering world objects!");
+    }
+    WorldServer::setAvailable();
 
 	bool LUNI_WRLD = true;
 	std::vector<unsigned char> buffer;
@@ -584,6 +596,10 @@ void parsePacket(RakPeerInterface* rakServer, SystemAddress &systemAddress, RakN
 			if (!flag){
 				rakServer->CloseConnection(systemAddress, true);
 			}
+			else{
+				int instance = InstancesTable::getInstanceId(WorldServer::getServerAddress());
+				SessionsTable::setInstanceId(systemAddress, instance);
+			}
 
 			//When the client is validated, send him to the right world.
 			//Actually, this should finally not be done here, but as a response to the char packet that sends the client to this server
@@ -645,7 +661,10 @@ void parsePacket(RakPeerInterface* rakServer, SystemAddress &systemAddress, RakN
 				ListCharacterInfo cinfo = CharactersTable::getCharacterInfo(s.activeCharId);
 				COMPONENT1_POSITION pos = COMPONENT1_POSITION(cinfo.lastPlace.x, cinfo.lastPlace.y, cinfo.lastPlace.z);
 				ZoneId zone = static_cast<ZoneId>(cinfo.lastPlace.zoneID);
-				Worlds::loadWorld(systemAddress, zone, pos, cinfo.lastPlace.mapInstance, cinfo.lastPlace.mapClone);
+				unsigned short instance = InstancesTable::getInstanceId(zone);
+				//SessionsTable::setInstanceId(systemAddress, instance);
+				//Worlds::loadWorld(systemAddress, zone, pos, cinfo.lastPlace.mapInstance, cinfo.lastPlace.mapClone);
+				Worlds::loadWorld(systemAddress, zone, pos, instance, cinfo.lastPlace.mapClone);
 				
 				//RakNet::BitStream worldLoad;
 				//usr->LoadWorld(usr->getWorld(), &worldLoad);

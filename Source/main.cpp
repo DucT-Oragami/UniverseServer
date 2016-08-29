@@ -149,52 +149,47 @@ int main(int argc, char* argv[]) {
 	// Args parser
 	int state = 0;
 	std::string setting = "";
+	std::string setting2 = "";
+	std::string setting3 = "";
 	ServerRole Role = ROLE_CONSOLE;
 
-	for (int argi = 0; argi < argc; argi++){
-		std::string arg = std::string(argv[argi]);
-		Logger::log("MAIN", "ARGS", arg, LOG_ALL);
-		switch (state){
-		case 2:
-			{
-				bool f = true;
-				if (arg.size() > 1){
-					if (arg.substr(0, 2) == "--"){
-						f = false;
-					}
-				}
-				if (f){
-					setting = arg;
-					break;
-				}
-			}
-		case 0:
-			if (arg == "--console"){
-				Role = ROLE_CONSOLE;
-			}
-			if (arg == "--gConfig"){
-				Config::generateDefaultConfig();
-				Role = ROLE_CONSOLE;
-			}
-			if (arg == "--world"){
-				Role = ROLE_WORLD;
-				setting = "World";
-				state = 2;
-			}
-			if (arg == "--auth"){
-				Role = ROLE_AUTH;
-				setting = "Auth";
-				state = 2;
-			}
-			if (arg == "--chat"){
-				Role = ROLE_CHAT;
-				setting = "Chat";
-				state = 2;
-			}
-			break;
+	int initial = 1;
+
+	std::string arg1 = std::string(0[argv]);
+
+	std::string::size_type last = arg1.find_last_of("/\\");
+	std::string trimedArg1 = arg1.substr(last+1);
+
+	if (trimedArg1 != "LUNIServer.exe") { initial = 0; }
+
+	if (std::string(argv[initial]) == "--console"){
+	    Role = ROLE_CONSOLE;
+	}
+	else if (std::string(argv[initial]) == "--gConfig"){
+		Config::generateDefaultConfig();
+	    printf("___CONFIG GENERATED___\n\nPress any key to exit . . .");
+		return 0;
+	}
+	else if (std::string(argv[initial]) == "--world"){
+		Role = ROLE_WORLD;
+		if (argc > initial+2){
+			setting = std::string(argv[initial+1]);
+			setting2 = std::string(argv[initial+2]);
+			setting3 = std::string(argv[initial+3]);
+		}
+		else{
+			setting = "EMPTY";
+			setting2 = "EMPTY";
+			setting3 = "EMPTY";
 		}
 	}
-
+	else if (std::string(argv[initial]) == "--master_World"){
+		Role = ROLE_MASTER_WORLD;
+	}
+	else if (std::string(argv[initial]) == "--auth"){
+		Role = ROLE_AUTH;
+	}
+    
 	Database::Init(Config::getMySQLHost(), Config::getMySQLDatabase(), Config::getMySQLUsername(), Config::getMySQLPassword());
 	unsigned int db_connect_result = Database::Connect();
 	if (db_connect_result > 0){
@@ -219,13 +214,18 @@ int main(int argc, char* argv[]) {
 		AuthLoop();
 	}
 	else if (Role == ROLE_WORLD){
-		WorldLoop();
+		WorldLoop(setting.c_str(), setting2.c_str(), setting3.c_str());
+		//initWorldServers();
 	}
 	/*else if (Role == ROLE_CHAT){
 		ChatLoop();
 	}*/
 	else if (Role == ROLE_CONSOLE){
 		ConsoleLoop();
+	}
+
+	else if (Role == ROLE_MASTER_WORLD){
+		initWorldServers();
 	}
 
 	exit(0);

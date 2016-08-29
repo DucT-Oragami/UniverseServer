@@ -97,6 +97,8 @@ CREATE TABLE IF NOT EXISTS `friends` (
 CREATE TABLE IF NOT EXISTS `instances` (
   `instanceid` int(11) NOT NULL AUTO_INCREMENT,
   `server_address` varchar(22) NOT NULL,
+  `world` varchar(32) NOT NULL,
+  `worldID` int(5) NOT NULL,
   PRIMARY KEY (`instanceid`)
 ) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
 
@@ -192,11 +194,18 @@ CREATE TABLE IF NOT EXISTS `world_objects` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-CREATE TABLE IF NOT EXIST `world_missions` (
-  `temp` bit NOT NULL 1,
-  `missionID` bigint(20) NOT NULL 0,
-  `giverID` bigint(20) NOT NULL 0
+CREATE TABLE IF NOT EXISTS `world_missions` (
+  `temp` tinyint NOT NULL DEFAULT '1',
+  `missionID` bigint(20) NOT NULL DEFAULT '0',
+  `giverID` bigint(20) NOT NULL DEFAULT '0'
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `gobals` (
+  `worldsLoading` tinyint NOT NULL DEFAULT '0'
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET =utf8 COLLATE=utf8_unicode_ci;
+
+/*CREATE [OR REPLACE] TRIGGER `WorldSwitch`
+BEFORE DELETE ON `sessions`,*/
 
 ALTER TABLE `instances` ADD FULLTEXT KEY `server_address` (`server_address`);
 

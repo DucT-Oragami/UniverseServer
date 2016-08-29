@@ -2,8 +2,10 @@
 #include "Logger.h"
 #include "UtfConverter.h"
 
-LVLFile::LVLFile(std::string filename, std::string scenename, unsigned long version, unsigned long worldID) {
-	std::vector<unsigned char> content = OpenPacket(filename);
+LVLFile::LVLFile(std::string filename, std::string scenename, unsigned long version, unsigned long worldID, std::string path) {
+	std::string tmp = "\\";
+	std::string filePath = path + tmp + filename;
+	std::vector<unsigned char> content = OpenPacket(filePath);
 
 	if (content.size() > 0) {
 		RakNet::BitStream file;
@@ -17,8 +19,6 @@ LVLFile::LVLFile(std::string filename, std::string scenename, unsigned long vers
 		unsigned char u8;
 		float f;
 
-		// Perhaps, if we're fortunate, one of the values here contains mission info
-		// ~ What missions are attached to the object/npc
 		while ((file.GetNumberOfUnreadBits() / 8) > 0) {
 			std::string cur = "";
 
@@ -52,6 +52,7 @@ LVLFile::LVLFile(std::string filename, std::string scenename, unsigned long vers
 
 						long LOT;
 
+                    // ID of the object, unused with our current setup, however - it will be useful in the future when working with missions/merchants
 						file.Read(u64);
 						file.Read(LOT);
 

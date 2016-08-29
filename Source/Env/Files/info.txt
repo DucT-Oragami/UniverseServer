@@ -1,0 +1,24 @@
+Some .luz files have been renamed to .dluz in order to disable them.
+This saves on memory as some worlds do not need to be loaded.
+
+When loading all objects, I would make sure you have 32GB of ram available.
+
+To reenable a .luz file, rename the .dluz extension back to .luz
+
+Disabled Files:
+---
+
+Properties
+Race Tracks
+Survival Files
+Shooting_Galleries
+All levels under WBL (The "user" created worlds, or something like that) have been disabled
+starbase3001
+
+~Ninjago~
+earthguantlet
+nd nj earth
+nd nj monastary
+monastery cave instance
+
+---

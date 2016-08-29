@@ -11,7 +11,8 @@ FileConfiguration::FileConfiguration(std::string filename) {
 				std::string line = "";
 				while (std::getline(file, line)) {
 					std::vector<std::string> section = split(line, '=');
-					_loadedData[section.at(0)] = section.at(1);
+					if (section.size() < 2) { continue; }
+				    _loadedData[section.at(0)] = section.at(1);
 				}
 				file.close();
 

@@ -1,22 +1,33 @@
 #include "Worlds.h"
 #include "RakNet\BitStream.h"
 #include "RakNet\ReplicaManager.h"
+#include "Packet.h"
 #include "WorldServer.h"
 #include "ServerDB.h"
 #include "Account.h"
 #include "Logger.h"
 #include "PlayerObject.h"
 #include "InventoryDB.h"
+#include "Config.h"
 
 bool Worlds::loadWorld(SystemAddress address, ZoneId zone, COMPONENT1_POSITION pos, unsigned short instance, unsigned long clone){
+	std::cout << "Instance is: " << instance << "\n";
+	SessionInfo client = SessionsTable::getClientSession(address);
+	if (client.instanceid == instance) {
+		Logger::log("USER", "WARNING", "Canceling loadWorld, Client already in world: " + zone, LOG_WARNING);
+		return false;
+	}
 	RakNet::BitStream * stream = WorldServer::initPacket(RemoteConnection::CLIENT, ClientPacketID::MSG_CLIENT_LOAD_STATIC_ZONE);
 
 	if (zone == ZoneId::NO_ZONE){
-		Logger::log("USER", "WARNING", "No zone selected, default to 1200 NIMBUS_STATION", LOG_DEBUG);
-		zone = ZoneId::NIMBUS_STATION;
+		//Logger::log("USER", "WARNING", "No zone selected, default to 1200 NIMBUS_STATION", LOG_DEBUG);
+		//zone = ZoneId::NIMBUS_STATION;
+		Logger::log("USER", "WARNING", "No zone selected, defaulting to 1000 - Venture Explorer", LOG_WARNING);
+		zone = ZoneId::VENTURE_EXPLORER;
 	}
 
 	stream->Write((unsigned short)zone);
+	// Use to switch between servers?
 	stream->Write(instance); //Instance
 	stream->Write(clone); //Clone
 
@@ -36,10 +47,37 @@ bool Worlds::loadWorld(SystemAddress address, ZoneId zone, COMPONENT1_POSITION p
 	stream->Write((unsigned long)0);
 
 	WorldServer::sendPacket(stream, address);
+
+	if (instance != 0){
+		//SessionsTable::setInstanceId(address, instance);
+		Worlds::switchInstance(address, instance);
+	}
+	
+	
 	return true;
 }
 
-int Instances::registerInstance(SystemAddress address){
+bool Worlds::switchInstance(SystemAddress address, unsigned short instance){
+	RakNet::BitStream *bitStream = WorldServer::initPacket(RemoteConnection::CLIENT, ClientPacketID::SERVER_REDIRECT);
+
+	std::string world = InstancesTable::getInstanceWorld(instance);
+	if (world == "0"){
+	    Logger::log("USER", "WARNING", "No such Instance Registered", LOG_WARNING);
+		return false;
+	}
+	std::string IP = Config::getIP("World");
+	WriteStringToBitStream(IP.c_str(), sizeof(IP), 33, bitStream);
+	unsigned short port = Config::getWorldPort(world);
+	bitStream->Write(port);
+	bitStream->Write((bool)0);
+	WorldServer::sendPacket(bitStream, address);
+	return true;
+}
+
+// Simply checks if an instance is already registered,
+// Actual registration is done in the function "InstancesTable::registerInstance(address)" seen below
+
+int Instances::registerInstance(SystemAddress address, std::string world, unsigned short worldID){
 	//TODO: We do this a little differently to not rocket up the instanceids,
 	//We should delete and recreate the instance once it has more content then just the address
 	int instanceid = InstancesTable::getInstanceId(address);
@@ -52,7 +90,7 @@ int Instances::registerInstance(SystemAddress address){
 		return instanceid;
 	}
 	else{
-		return InstancesTable::registerInstance(address);
+		return InstancesTable::registerInstance(address, world, worldID);
 	}
 }
 

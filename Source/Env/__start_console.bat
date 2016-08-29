@@ -1,2 +1,2 @@
 @echo off
-start LUNIServer.exe --console
+start /LOW LUNIServer.exe --console

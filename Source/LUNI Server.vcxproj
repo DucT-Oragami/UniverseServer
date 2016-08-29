@@ -71,6 +71,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>ws2_32.lib;libmysql.lib;zdll.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>MySql\lib;ZLIB\lib;Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <ResourceCompile />
   </ItemDefinitionGroup>
@@ -107,6 +108,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="dirent.h" />
     <ClInclude Include="Account.h" />
     <ClInclude Include="AccountsDB.h" />
     <ClInclude Include="CDClientDB.h" />
@@ -187,6 +189,7 @@
     <ClCompile Include="LUZFile.cpp" />
     <ClCompile Include="LVLFile.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MasterWorldLoop.cpp" />
     <ClCompile Include="MissionDB.cpp" />
     <ClCompile Include="sha512.cpp" />
     <ClCompile Include="NPCObject.cpp" />

@@ -129,7 +129,7 @@ bool Session::sendToInstance(SystemAddress client, SystemAddress addr){
 	int newinstanceid = InstancesTable::getInstanceId(addr);
 	if (newinstanceid > -1){
 		Logger::log("WRLD", "ACCT", "Sending char to new instance", LOG_DEBUG);
-		SessionsTable::setInstanceId(s.accountid, newinstanceid);
+		//SessionsTable::setInstanceId(s.accountid, newinstanceid);
 		return true;
 	}
 	return false;

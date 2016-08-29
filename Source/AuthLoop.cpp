@@ -100,7 +100,8 @@ void HandleUserLogin(RakPeerInterface* rakServer, Packet* packet) {
 
 		SystemAddress serverAddr;
 		serverAddr.SetBinaryAddress(Config::getIP("World").c_str());
-		serverAddr.port = Config::getPort("World");
+		serverAddr.port = Config::getWorldPort("EMPTY");
+		//serverAddr.port = Config::getPort("World");
 		
 		//query the account id of the associated with the username from the database
 		unsigned int accountid = AccountsTable::getAccountID(usernameA);
@@ -200,11 +201,13 @@ void HandleUserLogin(RakPeerInterface* rakServer, Packet* packet) {
 		loginStatusPacket.zeroLongLong = 0;
 
 		loginStatusPacket.redirectIp = Config::getIP("World");
-		loginStatusPacket.redirectPort = Config::getPort("World");
+		loginStatusPacket.redirectPort = Config::getWorldPort("EMPTY");
+		//loginStatusPacket.redirectPort = Config::getPort("World");
 
 		loginStatusPacket.errorMsg = errorMessage;
 		loginStatusPacket.errorMsgLength = loginStatusPacket.errorMsg.length();
 
+        // Does this string have no purpose at all?
 		std::string world_server_address;
 		
 		int instanceid = InstancesTable::getInstanceId(serverAddr);

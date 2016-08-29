@@ -20,6 +20,7 @@
 #include "CDClientDB.h"
 #include "Config.h"
 #include "LUZFile.h"
+#include "ServerDB.h"
 
 #include <chrono>
 #include <thread>
@@ -238,6 +239,8 @@ std::wstring WhisperCommandHandler::getSyntax(){
 	return L"<reciever> <message>";
 }
 
+
+// Teleport command for switching worlds, name is a bit misleading
 void TestmapCommandHandler::handleCommand(SessionInfo *s, std::vector<std::wstring> * params){
 	if (params->size() == 1){
 		std::string check = UtfConverter::ToUtf8(params->at(0));
@@ -264,12 +267,9 @@ void TestmapCommandHandler::handleCommand(SessionInfo *s, std::vector<std::wstri
 						place.z = pos.z;
 
 						CharactersTable::setCharactersPlace(s->activeCharId, place);
-						// GameMSG::displayZoneSummary(s->activeCharId, false /*((char)std::to_string(argumentValue).at(2)) == '5'*/, false);
-
-						Worlds::loadWorld(s->addr, zone, pos);
-
-						Session::leave(s->activeCharId);
-						ObjectsManager::clientLeaveWorld(s->activeCharId, s->addr);
+						unsigned short instance = InstancesTable::getInstanceId(zone);
+						
+						Worlds::loadWorld(s->addr, zone, pos, instance);
 					}
 					else{
 						Chat::sendChatMessage(s->addr, L"Cannot teleport to this zone!");

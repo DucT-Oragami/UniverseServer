@@ -23,11 +23,13 @@ private:
 public:
 	LUZFile();
 	LUZFile(std::string filename);
-	LUZFile(std::vector<unsigned char> data);
+	LUZFile(std::vector<unsigned char> data, std::string path);
 	~LUZFile();
 
 	unsigned long getVersion();
 	unsigned long getWorldID();
+
+	static std::vector<std::string> findall(char* path, bool pathOnly);
 	
 	Spawnpoint getSpawnpoint();
 

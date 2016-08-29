@@ -11,17 +11,17 @@
 class Worlds{
 public:
 	static bool loadWorld(SystemAddress address, ZoneId zone, COMPONENT1_POSITION pos, unsigned short instance = 0, unsigned long clone = 0);
+	static bool switchInstance(SystemAddress address, unsigned short instance);
 };
 
 class Instances{
 public:
 	//Registers the instance for this address, clears up sessions if necessary
-	static int registerInstance(SystemAddress address);
+	static int registerInstance(SystemAddress address, std::string world, unsigned short worldID);
 };
 
 class ObjectsManager{
 	static std::unordered_map<long long, ReplicaObject *> objects;
-	
 	
 public:
 	static void registerObject(ReplicaObject * object);

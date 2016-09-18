@@ -44,7 +44,7 @@ struct CharacterInfo{
 
 struct CharacterAttributes{
 	unsigned long level = 1;
-	long long uScore = 0;
+	unsigned long long uScore = 0;
 	unsigned long health = 4;
 	float maxHealth = 4.0f;
 	unsigned long imagination = 0;

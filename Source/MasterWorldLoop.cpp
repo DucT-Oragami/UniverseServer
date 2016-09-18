@@ -1,4 +1,5 @@
 #include "Database.h"
+#include "ServerDB.h"
 #include "LUZFile.h"
 #include "Config.h"
 #include "Logger.h"
@@ -57,13 +58,11 @@ void initWorldServers(){
 	InitSecurity(rakServer, Config::getUseEncryption());
 	SocketDescriptor socketDescriptor(Config::getPort("masterWorld"), 0);
 
-	if (rakServer->Startup(10, 30, &socketDescriptor, 1)){
+	if (rakServer->Startup(20, 30, &socketDescriptor, 1)){
 		Logger::log("MWorld", "", "started! Listening on port " + std::to_string(Config::getPort("masterWorld")));
 	} else QuitError("[MWorld] server init error!");
 
 	rakServer->SetMaximumIncomingConnections(50);
-
-	// Remove all previous world instances
 	dropAllInstances();
 
 	// Get all luz files
@@ -82,28 +81,43 @@ void initWorldServers(){
 		Logger::log("MWorld", "Start", luzFileNames.at(i), LOG_NORMAL);
 		std::string world = Config::getFileWorld(luzFileNames.at(i));
 		if (world == "EMPTY") Logger::log("MWorld", "Start", luzFileNames.at(i) + " returned EMPTY", LOG_WARNING);
-		start("LUNIServer.exe", "--world " + Config::getFileWorld(luzFileNames.at(i)) + " " + luzFiles.at(i) + " " + luzPaths.at(i));
+
+		start("LUNIServer.exe", "--world " + world + " " + luzFiles.at(i) + " " + luzPaths.at(i));
 	}
 
 	Packet *packet;
 
 	bool MASTER_WORLD = true;
 
-	// Ping all world servers, and disconnect failed ping ones.. or something like that
 	while (MASTER_WORLD){
 		RakSleep(30);
 		packet = rakServer->Receive();
 
 		if (packet == NULL) continue;
+		// Are we receiving a packing from a valid instance?
+		std::stringstream qrs;
+		qrs << "SELECT count(1) FROM `instances` WHERE `server_address` = '" << packet->systemAddress.ToString() << "';";
+		if (!Database::Query(qrs.str())) continue;
+
 		RakNet::BitStream *data = new RakNet::BitStream(packet->data, packet->length, false);
 		unsigned char packetID;
 		data->Read(packetID);
-		switch (packetID) {
-		    case 19:
-		    {
 
-			}
+		switch (packetID) {
+
+			case 17:
+			    Logger::log("MWORLD", "New Connection" , InstancesTable::getInstanceWorld(packet->systemAddress));
+				break;
+
+			case 20:
+			    Logger::log("MWORLD", "Lost Connection" , InstancesTable::getInstanceWorld(packet->systemAddress));
+			    InstancesTable::unregisterInstance(packet->systemAddress);
+				break;
+
+			default:
+				Logger::log("MWORLD", "", "received unknown packet: " + RawDataToString(packet->data, packet->length));
 		}
+		rakServer->DeallocatePacket(packet);
 	}
 
 	rakServer->Shutdown(0);

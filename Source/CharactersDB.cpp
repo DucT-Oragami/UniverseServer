@@ -527,12 +527,12 @@ void CharactersTable::addCharacterUScore(long long objid, long long score){
 	// Notes:
 		// uScore is updated on server join,
 		// but not on world switch
-		PlayerObject *player = (PlayerObject *)ObjectsManager::getObjectByID(objid);
+		/*PlayerObject *player = (PlayerObject *)ObjectsManager::getObjectByID(objid);
         CharacterComponent *c4 = player->getComponent4();
         PLAYER_INFO pi;
 		pi.legoScore = finalScore;
 		c4->setInfo(pi);
-		ObjectsManager::serialize(player);
+		ObjectsManager::serialize(player);*/
 
 		SessionInfo s = SessionsTable::getClientSession(SessionsTable::findCharacter(objid));
 
@@ -540,8 +540,9 @@ void CharactersTable::addCharacterUScore(long long objid, long long score){
 	    RakNet::BitStream *bs = WorldServer::initPacket(RemoteConnection::CLIENT, ClientPacketID::SERVER_GAME_MSG);
 	    bs->Write(objid);
 	    bs->Write((unsigned short)1459);
-		bs->Write((long long)finalScore);
-		bs->Write((int)0);
+		//bs->Write((long long)finalScore);
+		bs->Write((unsigned long long)score);
+		//bs->Write((int)0);
 
 		// Send Packet
 		std::vector<SessionInfo> sessionsz = SessionsTable::getClientsInWorld(s.zone);

@@ -123,7 +123,8 @@ void WorldLoop(const char *world, const char *luzFile, const char *luzPath){
 
 	//Before we start handling packets, we set this RakPeer as the world server of this instance
 	WorldServer::publishWorldServer(rakServer, &replicaManager, ServerAddress);
-
+	// The master world loop password ("3.25 ND1", 8) should be different - possibly a random string at each startup?
+	rakServer->Connect(Config::getIP("masterWorld").c_str(), Config::getPort("masterWorld"), "3.25 ND1", 8);
 	//rakServer->Connect(host, hostPort, 0, 0,
 
 	ChatCommandManager::registerCommands(new FlightCommandHandler());

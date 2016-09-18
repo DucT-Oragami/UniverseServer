@@ -94,6 +94,25 @@ std::string InstancesTable::getInstanceWorld(int instanceID){
 	}
 }
 
+std::string InstancesTable::getInstanceWorld(SystemAddress addr){
+	std::stringstream str;
+	str << "SELECT `world` FROM `instances` WHERE `server_address` = '" << addr.ToString() << "';";
+	auto qr = Database::Query(str.str());
+	if (qr == NULL){
+		Logger::logError("Server DB", "MYSQL", "getting world", mysql_error(Database::getConnection()));
+		return 0;
+	}
+	else{
+		if (mysql_num_rows(qr) == 0){
+			return 0;
+		}
+		else{
+			auto row = mysql_fetch_row(qr);
+			return row[0];
+		}
+	}
+}
+
 void InstancesTable::unregisterInstance(SystemAddress addr){
 	std::stringstream str;
 	str << "DELETE FROM `instances` WHERE `server_address` = '" << addr.ToString() << "';";

@@ -18,6 +18,7 @@ public:
 	static int getInstanceId(SystemAddress addr);
 	static int getInstanceId(std::string world);
 	static std::string getInstanceWorld(int instanceID);
+	static std::string getInstanceWorld(SystemAddress addr);
 	//static SystemAddress getInstanceAddress(int instanceID);
 	static void unregisterInstance(SystemAddress addr);
 };

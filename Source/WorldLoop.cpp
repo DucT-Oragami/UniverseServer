@@ -600,6 +600,7 @@ void parsePacket(RakPeerInterface* rakServer, SystemAddress &systemAddress, RakN
 			else{
 				int instance = InstancesTable::getInstanceId(WorldServer::getServerAddress());
 				SessionsTable::setInstanceId(systemAddress, instance);
+				SessionsTable::removeMigration(systemAddress);
 			}
 
 			//When the client is validated, send him to the right world.

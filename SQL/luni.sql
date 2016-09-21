@@ -160,6 +160,11 @@ CREATE TABLE IF NOT EXISTS `sessions` (
   PRIMARY KEY (`sessionid`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
+CREATE TABLE IF NOT EXISTS `migrations` (
+  `ipaddress` varchar(21) NOT NULL DEFAULT '',
+  `request_time` bigint(20) NOT NULL DEFAULT '0'
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET =utf8 COLLATE=utf8_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS `topics` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(128) COLLATE utf8_unicode_ci NOT NULL,

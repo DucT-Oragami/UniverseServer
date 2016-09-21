@@ -87,6 +87,10 @@ private:
 	//static std::unordered_map<SystemAddress, SessionInfo, SystemAddressHasher> sessions;
 public:
 	//Connection
+	static void migrate(SystemAddress address);
+	static bool isMigrating(SystemAddress address);
+	static void removeMigration(SystemAddress address);
+
 	static SessionInfo connect(SystemAddress address);
 	static bool disconnect(SystemAddress address);
 

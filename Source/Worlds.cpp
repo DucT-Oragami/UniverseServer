@@ -11,7 +11,6 @@
 #include "Config.h"
 
 bool Worlds::loadWorld(SystemAddress address, ZoneId zone, COMPONENT1_POSITION pos, unsigned short instance, unsigned long clone){
-	std::cout << "Instance is: " << instance << "\n";
 	SessionInfo client = SessionsTable::getClientSession(address);
 	if (client.instanceid == instance) {
 		Logger::log("USER", "WARNING", "Canceling loadWorld, Client already in world: " + zone, LOG_WARNING);
@@ -57,6 +56,10 @@ bool Worlds::loadWorld(SystemAddress address, ZoneId zone, COMPONENT1_POSITION p
 	return true;
 }
 
+
+
+
+
 bool Worlds::switchInstance(SystemAddress address, unsigned short instance){
 	RakNet::BitStream *bitStream = WorldServer::initPacket(RemoteConnection::CLIENT, ClientPacketID::SERVER_REDIRECT);
 
@@ -70,6 +73,9 @@ bool Worlds::switchInstance(SystemAddress address, unsigned short instance){
 	unsigned short port = Config::getWorldPort(world);
 	bitStream->Write(port);
 	bitStream->Write((bool)0);
+
+	SessionsTable::migrate(address);
+
 	WorldServer::sendPacket(bitStream, address);
 	return true;
 }

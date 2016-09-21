@@ -150,6 +150,43 @@ unsigned char AccountsTable::getRank(unsigned int accountid){
 	}
 }
 
+void SessionsTable::migrate(SystemAddress address){
+	std::stringstream str;
+	str << "INSERT INTO `migrations` (`ipaddress`, `request_time`) VALUES ('" << address.ToString() << "', '" << std::to_string(time(0)) << "')";
+	Database::Query(str.str());
+}
+
+bool SessionsTable::isMigrating(SystemAddress address){
+	std::stringstream str;
+	str << "SELECT `request_time` FROM `migrations` WHERE `ipaddress` = '" << address.ToString() << "';";
+	auto qr = Database::Query(str.str());
+	if (qr == NULL){
+		Logger::logError("ACDB", "MYSQL", "isMigrating " + std::string(address.ToString()), mysql_error(Database::getConnection()));
+	}
+	if (mysql_num_rows(qr) == 0){
+		return 0;
+	}
+	else{
+		auto row = mysql_fetch_row(qr);
+		long current = time(0);
+		long request = atol(row[0]);
+
+		// Allow configurable drop off value here
+	// Migration request invalid, discconect user and remove request
+		if (difftime(current, request) > 5){
+			SessionsTable::removeMigration(address);
+			SessionsTable::disconnect(address);
+			return 0;
+		}
+
+		return 1;
+	}
+}
+
+void SessionsTable::removeMigration(SystemAddress address){
+	Database::Query("DELETE FROM `migrations` WHERE `ipaddress` = '" + std::string(address.ToString()) + "'");
+}
+
 //Connection
 SessionInfo SessionsTable::connect(SystemAddress address){
 	//sessions.insert(std::make_pair(address, SessionInfo(address)));
@@ -166,7 +203,6 @@ SessionInfo SessionsTable::connect(SystemAddress address){
 
 bool SessionsTable::disconnect(SystemAddress address){
 	std::stringstream str2;
-	str2 << "WAITFOR DELAY '00:00:05';";
 	str2 << "DELETE FROM `sessions` WHERE `ipaddress` = '" << address.ToString() << "'";
 	Database::Query(str2.str());
 	return true;
@@ -243,11 +279,11 @@ SessionInfo SessionsTable::logout(unsigned int accountid){
 	SystemAddress addr = SessionsTable::findAccount(accountid);
 	if (addr != UNASSIGNED_SYSTEM_ADDRESS){
 		SessionInfo s = SessionsTable::getClientSession(addr);
+		if (SessionsTable::isMigrating(addr)) return s;
 		if (s.phase > SessionPhase::PHASE_CONNECTED){
 			s.phase = SessionPhase::PHASE_CONNECTED;
 			s.accountid = 0;
 			std::stringstream str;
-			str << "WAITFOR DELAY '00:00:05';";
 			str << "UPDATE `sessions` SET `phase` = '" << std::to_string((unsigned char)s.phase) << "', `accountid` = '" << std::to_string(s.accountid) << "' WHERE `ipaddress` = '" << addr.ToString() << "'";
 			auto qr = Database::Query(str.str());
 			if (qr == NULL){
@@ -336,12 +372,12 @@ SessionInfo SessionsTable::quit(long long charid){
 	SystemAddress addr = SessionsTable::findCharacter(charid);
 	if (addr != UNASSIGNED_SYSTEM_ADDRESS){
 		SessionInfo s = SessionsTable::getClientSession(addr);
+		if (SessionsTable::isMigrating(addr)) return s;
 		if (s.phase > SessionPhase::PHASE_AUTHENTIFIED){
 			s.phase = SessionPhase::PHASE_AUTHENTIFIED;
 			s.worldJoin = 0;
 			s.activeCharId = -1;
 			std::stringstream str;
-			str << "WAITFOR DELAY '00:00:05';";
 			str << "UPDATE `sessions` SET `phase` = '" << std::to_string((unsigned char)s.phase) << "', `charid` = '" << std::to_string(s.activeCharId) << "' WHERE `ipaddress` = '" << addr.ToString() << "'";
 			auto qr = Database::Query(str.str());
 			if (qr == NULL){

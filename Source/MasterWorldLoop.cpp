@@ -3,9 +3,12 @@
 #include "LUZFile.h"
 #include "Config.h"
 #include "Logger.h"
+#include "AccountsDB.h"
 
 #include "RakNet\RakSleep.h"
 #include "RakNet\RakNetworkFactory.h"
+
+#include <thread>
 
 void start(LPCTSTR application, std::string argv){
 	STARTUPINFO si;
@@ -36,6 +39,32 @@ void start(LPCTSTR application, std::string argv){
 void dropAllInstances(){
 	Database::Query("TRUNCATE TABLE instances");
 	Database::Query("TRUNCATE TABLE sessions");
+	Database::Query("TRUNCATE TABLE migrations");
+}
+
+// Periodically remove failed migrations
+void cleanRoutine(){
+    bool running = 1;
+	while (running){
+		auto qr = Database::Query("SELECT `ipaddress` FROM `migrations`");
+		if (qr == NULL){
+		    Logger::logError("MWorld", "MYSQL", "Database", mysql_error(Database::getConnection()));
+	    }
+	    if (mysql_num_rows(qr) != 0){
+			int i;
+			int count = 0;
+			auto row = mysql_fetch_row(qr);
+			for (i = 0; i < qr->row_count; i++){
+				SystemAddress addr;
+				addr.SetBinaryAddress(row[i]);
+				if (!SessionsTable::isMigrating(addr)) count++;
+			}
+			if (count) Logger::log("MWorld", "Cleaner", std::to_string(count) + " failed migration(s) removed");
+	    }
+	    // To Do: Configure wait time
+		RakSleep(10000);
+
+	}
 }
 
 std::vector<std::string> getFileNames(std::vector<std::string> filePaths){
@@ -84,6 +113,8 @@ void initWorldServers(){
 
 		start("LUNIServer.exe", "--world " + world + " " + luzFiles.at(i) + " " + luzPaths.at(i));
 	}
+
+	std::thread cleaningThread(cleanRoutine);
 
 	Packet *packet;
 

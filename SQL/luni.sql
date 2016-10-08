@@ -13,7 +13,8 @@ Also includes Jonny's SQL Code that has a table called World_Objects that holds 
 CREATE TABLE IF NOT EXISTS `accounts` (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` varchar(35) COLLATE utf8_unicode_ci NOT NULL,
-  `password` varchar(128) COLLATE utf8_unicode_ci NOT NULL,
+  `password` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
+  `salt` varchar(128) COLLATE utf8_unicode_ci NOT NULL,
   `email` varchar(30) COLLATE utf8_unicode_ci NOT NULL,
   `ip` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '127.0.0.1',
   `rank` smallint(1) NOT NULL DEFAULT '0',

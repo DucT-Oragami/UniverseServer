@@ -46,9 +46,10 @@ void HandleUserLogin(RakPeerInterface* rakServer, Packet* packet) {
 		std::wstring username = PacketTools::ReadFromPacket(data, 33);
 		std::wstring password = PacketTools::ReadFromPacket(data, 41);
 		Logger::log("AUTH", "LOGIN", "Username: " + UtfConverter::ToUtf8(username), LOG_DEBUG);
-		std::vector<char> pwcv(password.size(), '*');
-		std::string pwcs(pwcv.begin(), pwcv.end());
-		Logger::log("AUTH", "LOGIN", "Password: " + pwcs, LOG_DEBUG);
+		//std::vector<char> pwcv(password.size(), '*');
+		//std::string pwcs(pwcv.begin(), pwcv.end());
+		//Logger::log("AUTH", "LOGIN", "Password: " + pwcs, LOG_DEBUG);
+		Logger::log("AUTH", "LOGIN", "Password: HIDDEN, NOT_SHOWN", LOG_DEBUG);
 		unsigned short language_id;
 		data->Read(language_id);
 		Logger::log("AUTH", "LOGIN", "Language: " + std::to_string(language_id), LOG_ALL);

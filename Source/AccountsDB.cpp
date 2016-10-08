@@ -23,18 +23,21 @@ unsigned int AccountsTable::getAccountID(std::string username){
 unsigned long long AccountsTable::addAccount(std::string name, std::string password){
 	unsigned int id = AccountsTable::getAccountID(name);
 	if (id > 0) return 0; //Account name already exists
-	std::string hpw = hashPassword(password); //Hash password
-	Database::Query("INSERT INTO `accounts` (`id`, `name`, `password`, `email`, `ip`, `rank`, `numChars`, `frontChar`, `lastLog`, `activeSub`, `subTime`, `legoClub`, `locked`, `banned`, `loginTries`) VALUES (NULL, '" + name + "', '" + hpw + "', '', '127.0.0.1', '0', '0', '0', CURRENT_TIMESTAMP, '0', '', '', '0', '0', '0');");
+	std::string salt = generateSalt();
+	std::string hpw = hashPassword(password, salt);
+
+	Database::Query("INSERT INTO `accounts` (`id`, `name`, `password`, `salt`, `email`, `ip`, `rank`, `numChars`, `frontChar`, `lastLog`, `activeSub`, `subTime`, `legoClub`, `locked`, `banned`, `loginTries`) VALUES (NULL, '" + name + "', '" + hpw + "', '" + salt + "', '', '127.0.0.1', '0', '0', '0', CURRENT_TIMESTAMP, '0', '', '', '0', '0', '0');");
 	unsigned long long accountid = mysql_insert_id(Database::getConnection());
 	return accountid;
 }
 
 bool AccountsTable::checkPassword(std::string password, unsigned int accountid){
-	auto qr = Database::Query("SELECT `password` FROM `accounts` WHERE `id` = '" + std::to_string(accountid) + "' LIMIT 1;");
-	if (mysql_num_rows(qr) == 0) return false; //Actually this should NEVER happen
+	auto qr = Database::Query("SELECT `password`, `SALT` FROM `accounts` WHERE `id` = '" + std::to_string(accountid) + "' LIMIT 1;");
+	if (mysql_num_rows(qr) < 1) return false; //Actually this should NEVER happen
 	auto r = mysql_fetch_row(qr);
 	std::string pwhash = r[0];
-	std::string testhash = hashPassword(password);
+	std::string salt = r[1];
+	std::string testhash = hashPassword(password, salt);
 	if (pwhash == testhash) return true;
 	return false;
 }
